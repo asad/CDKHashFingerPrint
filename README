@@ -1,0 +1,5 @@
+This is an attempt to improve the CDK HashFingerprint (Fingerprinter class).
+The idea behind the improvised version is borrowed from my blog iprovised hashing fuction and their impact on the fingerprints. 
+
+http://chembioinfo.com/2011/10/30/revisiting-molecular-hashed-fingerprints/
+ 
