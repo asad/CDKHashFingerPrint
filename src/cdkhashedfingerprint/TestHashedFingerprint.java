@@ -43,7 +43,7 @@ public class TestHashedFingerprint extends Base {
     public static void main(String[] args) throws FileNotFoundException, CDKException, IOException {
         String s = System.getProperty("user.home") + File.separator + args[0];
         File directory = new File(s);
-        int expectedDataSize = 1000;
+        int expectedDataSize = 2000;
         Map<String, IAtomContainer> molecules =
                 readMDLMolecules(directory, expectedDataSize);
         System.out.println("Total number of mols read: " + molecules.size());
@@ -86,6 +86,12 @@ public class TestHashedFingerprint extends Base {
                 }
             }
 
+            TP = 0;
+            FP = 0;
+            FN = 0;
+            TN = 0;
+            HITS = 0;
+
             long startTime = System.currentTimeMillis();
             for (Data fragment : dataMap.values()) {
                 for (Data original : dataMap.values()) {
@@ -112,7 +118,7 @@ public class TestHashedFingerprint extends Base {
                 }
             }
 
-            System.out.print(dataMap.size() + "\t");
+            System.out.print(dataMap.size() + "*" + dataMap.size() + "\t");
             System.out.print(TP + "\t");
             System.out.print(FP + "\t");
             System.out.print(TN + "\t");
