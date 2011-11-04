@@ -70,7 +70,7 @@ public class TestHashedFingerprint extends Base {
                 }
                 try {
                     BitSet hashedFingerPrint;
-                    if (args[1].equals("cdk")) {
+                    if (args.length > 1 && args[1].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac);
                     } else {
                         hashedFingerPrint = getNewFingerprint(ac);
