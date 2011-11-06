@@ -1,5 +1,5 @@
 This is an attempt to improve the CDK HashFingerprint (Fingerprinter class).
-The idea behind the improvised version is borrowed from my blog iprovised hashing fuction and their impact on the fingerprints. 
+The idea behind the improved version is borrowed from my blog improvised hashing fuction and their impact on the fingerprints. 
 
 http://chembioinfo.com/2011/10/30/revisiting-molecular-hashed-fingerprints/
 
@@ -15,7 +15,7 @@ CASES:		TP:	FP:	TN:	FN:   ACCURACY:	TPR:	FPR:   Time (mins):
 1200*1200	17178	19262	1403560	0	0.987	1.000	0.014	2.92
 
 ***************************************
-Improvised CDK Fingerprinter class
+Improved CDK Fingerprinter class
 ***************************************
 CASES:		TP:	FP:	TN:	FN:   ACCURACY: TPR:	FPR:   Time (mins): 
 200*200		629	217	39154	0	0.995	1.000	0.006	0.12
@@ -28,7 +28,7 @@ CASES:		TP:	FP:	TN:	FN:   ACCURACY: TPR:	FPR:   Time (mins):
 
 Results:
 
-The improvised fingerprinter has better "Accuracy" and number of false positives (FP) are 
+The improved fingerprinter has better "Accuracy" and number of false positives (FP) are 
 ~30-40% lesser than the orignal version!
 
   
