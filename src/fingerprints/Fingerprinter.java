@@ -46,10 +46,13 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IPseudoAtom;
+import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
+import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -105,25 +108,20 @@ public class Fingerprinter implements IFingerprinter {
     public final static int DEFAULT_SIZE = 1024;
     /** The default search depth used to create the fingerprints. */
     public final static int DEFAULT_SEARCH_DEPTH = 8;
+    private IAtomContainer ringContainer;
     private int size;
+    private boolean respectRingMatches;
     private int searchDepth;
     static int debugCounter = 0;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(Fingerprinter.class);
-    private static final Map<String, String> queryReplace = new HashMap<String, String>() {
+    private static final Map<String, String> patterns = new HashMap<String, String>() {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 3348458944893841L;
 
         {
-            put("Cl", "X");
-            put("Br", "Z");
-            put("Si", "Y");
-            put("As", "D");
-            put("Li", "L");
-            put("Se", "E");
-            put("Na", "G");
-            put("Ca", "J");
-            put("Al", "A");
+            put("R", "*");
+            put("X", "**");
         }
     };
 
@@ -150,7 +148,7 @@ public class Fingerprinter implements IFingerprinter {
     public Fingerprinter(int size, int searchDepth) {
         this.size = size;
         this.searchDepth = searchDepth;
-
+        this.respectRingMatches=false;
     }
 
     /**
@@ -167,6 +165,13 @@ public class Fingerprinter implements IFingerprinter {
     public BitSet getFingerprint(IAtomContainer container,
             AllRingsFinder ringFinder)
             throws CDKException {
+        if (isRespectRingMatches()) {
+            IRingSet ringSet = new SSSRFinder(container).findSSSR();
+            RingSetManipulator.sort(ringSet);
+            RingSetManipulator.markAromaticRings(ringSet);
+            ringContainer = RingSetManipulator.getAllInOneContainer(ringSet);
+        }
+
         int position = -1;
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
@@ -179,7 +184,7 @@ public class Fingerprinter implements IFingerprinter {
         logger.debug("Finished Aromaticity Detection");
         BitSet bitSet = new BitSet(size);
 
-        int[] hashes = findPathes(container, searchDepth);
+        int[] hashes = findPaths(container, searchDepth);
         for (int hash : hashes) {
             position = (int) RandomNumber.generateMersenneTwisterRandomNumber(size, hash);
             bitSet.set(position);
@@ -203,9 +208,12 @@ public class Fingerprinter implements IFingerprinter {
     }
 
     /** {@inheritDoc}
+     * @param atomContainer
+     * @return 
+     * @throws CDKException  
      */
     @Override
-    public Map<String, Integer> getRawFingerprint(IAtomContainer iAtomContainer) throws CDKException {
+    public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
         throw new UnsupportedOperationException();
     }
 
@@ -219,29 +227,30 @@ public class Fingerprinter implements IFingerprinter {
      * @param searchDepth The maximum path length desired
      * @return A Map of path strings, keyed on themselves
      */
-    protected int[] findPathes(IAtomContainer container, int searchDepth) {
+    protected int[] findPaths(IAtomContainer container, int searchDepth) {
+
+        List<String> pseudoAtoms = new ArrayList<String>();
+        int pseduoAtomCounter = 0;
 
         List<StringBuffer> allPaths = new ArrayList<StringBuffer>();
 
         Map<IAtom, Map<IAtom, IBond>> cache = new HashMap<IAtom, Map<IAtom, IBond>>();
-
-        for (IAtom startAtom : container.atoms()) {
-            List<List<IAtom>> p = PathTools.getPathsOfLengthUpto(container,
-                    startAtom,
-                    searchDepth);
-            for (List<IAtom> path : p) {
+        for (IAtom sourceAtom : container.atoms()) {
+            List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(container, sourceAtom, DEFAULT_SEARCH_DEPTH);
+            for (List<IAtom> path : pathsOfLengthUpto) {
                 StringBuffer sb = new StringBuffer();
                 IAtom x = path.get(0);
 
-                // TODO if we ever get more than 255 elements, this will 
-                // fail maybe we should use 0 for pseudo atoms and 
-                // malformed symbols?
                 if (x instanceof IPseudoAtom) {
-                    sb.append((char) PeriodicTable.getElementCount() + 1);
+                    if (!pseudoAtoms.contains(x.getSymbol())) {
+                        pseudoAtoms.add(pseduoAtomCounter++, x.getSymbol());
+                    }
+                    sb.append((char) (PeriodicTable.getElementCount()
+                            + pseudoAtoms.indexOf(x.getSymbol()) + 1));
                 } else {
                     Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
                     if (atnum != null) {
-                        sb.append(convertSymbol(x.getSymbol()));
+                        sb.append(convertSymbol(x));
                     } else {
                         sb.append((char) PeriodicTable.getElementCount() + 1);
                     }
@@ -263,7 +272,7 @@ public class Fingerprinter implements IFingerprinter {
                                 });
                     }
                     sb.append(getBondSymbol(b[0]));
-                    sb.append(convertSymbol(y[0].getSymbol()));
+                    sb.append(convertSymbol(y[0]));
                     x = y[0];
                 }
 
@@ -278,6 +287,9 @@ public class Fingerprinter implements IFingerprinter {
                 }
             }
         }
+
+        pseudoAtoms.clear();
+
         // now lets clean stuff up
         Set<String> cleanPath = new HashSet<String>();
         for (StringBuffer s : allPaths) {
@@ -301,15 +313,29 @@ public class Fingerprinter implements IFingerprinter {
         for (String s : cleanPath) {
             hashes[i++] = new HashCodeBuilder(17, 37).append(s).toHashCode();
         }
-
         return hashes;
     }
 
-    private String convertSymbol(String symbol) {
+    private String convertSymbol(IAtom atom) {
+        Double charge = atom.getCharge() == null ? 0. : atom.getCharge();
+        Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
+        Integer atomNum = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
+        int isRingAtom = 0;
+        if (isRespectRingMatches()) {
+            isRingAtom = ringContainer.contains(atom) == true ? 1 : 0;
+        }
 
-        String returnSymbol = queryReplace.get(symbol);
-        return returnSymbol == null ? symbol
-                : returnSymbol;
+        String atomConfiguration = atom.getSymbol()
+                + ":" + charge.toString()
+                + ":" + stereoParity.toString()
+                + ":" + atomNum
+                + ":" + isRingAtom;
+
+        if (!patterns.containsKey(atomConfiguration)) {
+            String generatedPattern = generateNewPattern();
+            patterns.put(atomConfiguration, generatedPattern);
+        }
+        return patterns.get(atomConfiguration);
     }
 
     /**
@@ -321,7 +347,7 @@ public class Fingerprinter implements IFingerprinter {
     protected String getBondSymbol(IBond bond) {
         String bondSymbol = "";
         if (bond.getFlag(CDKConstants.ISAROMATIC)) {
-            bondSymbol = ":";
+            bondSymbol = "@";
         } else if (bond.getOrder() == IBond.Order.SINGLE) {
             bondSymbol = "-";
         } else if (bond.getOrder() == IBond.Order.DOUBLE) {
@@ -341,5 +367,32 @@ public class Fingerprinter implements IFingerprinter {
     @Override
     public int getSize() {
         return size;
+    }
+
+    private String generateNewPattern() {
+        int patternSize = patterns.size() + 1;
+        StringBuilder st = new StringBuilder(patternSize);
+        for (int i = 0; i < patternSize; i++) {
+            st.append('*');
+        }
+        return st.toString();
+    }
+
+    /**
+     * Should match rings to rings and non-rings to non-rings
+     * @return the respect ring matches
+     */
+    public boolean isRespectRingMatches() {
+        return respectRingMatches;
+    }
+
+    /**
+     * Ring matches are allowed and non-ring to ring matches are
+     * discarded
+     * @param respectRingMatches respect the ring-to-ring matches 
+     * and discard non-ring to ring matches
+     */
+    public void setRespectRingMatches(boolean respectRingMatches) {
+        this.respectRingMatches = respectRingMatches;
     }
 }

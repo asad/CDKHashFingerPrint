@@ -72,10 +72,11 @@ public class BenchmarkHashedFingerprint extends Base {
                     BitSet hashedFingerPrint;
                     if (args.length > 1 && args[1].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac);
-                    } else {
+                        dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
+                    } else if (args.length > 1 && args[1].equals("new")) {
                         hashedFingerPrint = getNewFingerprint(ac);
+                        dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
-                    dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.err.println("error in generating fp: " + ac.getID());
@@ -98,7 +99,12 @@ public class BenchmarkHashedFingerprint extends Base {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-                    VF2 sub = new VF2(true, false);
+                    VF2 sub;
+                    if (args[2].equals("1")) {
+                        sub = new VF2(true, true);
+                    } else {
+                        sub = new VF2(true, false);
+                    }
                     sub.set(fragment.getAtomContainer(), original.getAtomContainer());
                     boolean TrueMatch = sub.isSubgraph();
 
