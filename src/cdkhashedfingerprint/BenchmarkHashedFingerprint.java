@@ -23,7 +23,7 @@ import org.openscience.smsd.algorithm.vflib.substructure.VF2;
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
-public class TestHashedFingerprint extends Base {
+public class BenchmarkHashedFingerprint extends Base {
 
     private static long TP;
     private static long FP;
