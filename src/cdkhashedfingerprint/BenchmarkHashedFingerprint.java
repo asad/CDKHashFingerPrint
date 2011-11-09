@@ -17,7 +17,6 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
 /**
@@ -105,18 +104,17 @@ public class BenchmarkHashedFingerprint extends Base {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-//                    VF2 sub = new VF2(true, false);
-////                    if (args[2].equals("1")) {
-////                        sub = new VF2(true, true);
-////                    }
-////                    if (args[2].equals("2")) {
-////                        sub = new VF2(true, false);
-////                    }
-//                    sub.set(fragment.getAtomContainer(), original.getAtomContainer());
-//                    boolean TrueMatch = sub.isSubgraph();
+                    VF2 sub = null;
+                    if (args[2].equals("1")) {
+                        sub = new VF2(true, true);
+                    }
+                    if (args[2].equals("2")) {
+                        sub = new VF2(true, false);
+                    }
+                    sub.set(fragment.getAtomContainer(), original.getAtomContainer());
+                    boolean TrueMatch = sub.isSubgraph();
 
 
-                    boolean TrueMatch = UniversalIsomorphismTester.isSubgraph(original.getAtomContainer(), fragment.getAtomContainer());
                     if (FPMatch && TrueMatch) {
                         TP++;
                     }
