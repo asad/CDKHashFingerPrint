@@ -13,14 +13,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.jniinchi.INCHI_RET;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.Molecule;
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
  *
@@ -65,13 +63,9 @@ public class Base {
                     MDLV2000Reader reader = new MDLV2000Reader(new FileReader(fileIndex));
                     IAtomContainer ac = (IAtomContainer) reader.read(new Molecule());
                     ac.setID((fileIndex.getName().split(".mol"))[0]);
-                    String inchiKey;
                     try {
-                        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(ac);
-                        AtomContainerManipulator.removeHydrogens(ac);
-                        CDKHueckelAromaticityDetector.detectAromaticity(ac);
-                        inchiKey = generateInchiKey(ac);
-                        if (inchiKey == null || inchiMolMap.containsKey(inchiKey) || ac.getAtomCount() < 3) {
+                        String inchiKey = generateInchiKey(ac);
+                        if (inchiKey == null || ac.getAtomCount() < 3) {
                             continue;
                         }
                         inchiMolMap.put(inchiKey, ac);
@@ -87,6 +81,5 @@ public class Base {
             }
         }
         return inchiMolMap;
-
     }
 }

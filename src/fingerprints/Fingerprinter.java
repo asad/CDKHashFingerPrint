@@ -40,7 +40,6 @@ import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -52,7 +51,6 @@ import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
-import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -68,14 +66,13 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *   Molecule molecule = new Molecule();
  *   IFingerprinter fingerprinter = new Fingerprinter();
  *   BitSet fingerprint = fingerprinter.getFingerprint(molecule);
+ *   This will match ring system with rings.
+ *   fingerprinter.setRespectRingMatches(true);
  *   fingerprint.size(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
  * </pre> <p>
  *
- *  The FingerPrinter assumes that hydrogens are explicitly given! Furthermore,
- *  if pseudo atoms or atoms with malformed symbols are present, their atomic 
- *  number is taken as one more than the last element currently supported in 
- *  {@link org.openscience.cdk.tools.periodictable.PeriodicTable}. 
+ *  The FingerPrinter assumes that hydrogens are explicitly given!
  *
  *  <font color="#FF0000">Warning: The aromaticity detection for this
  *  FingerPrinter relies on AllRingsFinder, which is known to take very long
@@ -94,7 +91,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *  high. </font>
  *  </p>
  *
- * @author         steinbeck
+ * @author         Syed Asad Rahman
  * @cdk.created    2002-02-24
  * @cdk.keyword    fingerprint
  * @cdk.keyword    similarity
@@ -104,17 +101,14 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
 public class Fingerprinter implements IFingerprinter {
 
-    /** The default length of created fingerprints. */
-    public final static int DEFAULT_SIZE = 1024;
-    /** The default search depth used to create the fingerprints. */
-    public final static int DEFAULT_SEARCH_DEPTH = 8;
-    private IAtomContainer ringContainer;
     private int size;
     private boolean respectRingMatches;
     private int searchDepth;
     static int debugCounter = 0;
+    private AllRingsFinder ringFinder;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(Fingerprinter.class);
+    private static final Map<String, Integer> uniquePaths = new HashMap<String, Integer>();
     private static final Map<String, String> patterns = new HashMap<String, String>() {
 
         private static final long serialVersionUID = 3348458944893841L;
@@ -148,7 +142,7 @@ public class Fingerprinter implements IFingerprinter {
     public Fingerprinter(int size, int searchDepth) {
         this.size = size;
         this.searchDepth = searchDepth;
-        this.respectRingMatches=false;
+        this.respectRingMatches = false;
     }
 
     /**
@@ -162,22 +156,18 @@ public class Fingerprinter implements IFingerprinter {
      * @return A {@link BitSet} representing the fingerprint
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
+    @Override
     public BitSet getFingerprint(IAtomContainer container,
             AllRingsFinder ringFinder)
             throws CDKException {
-        if (isRespectRingMatches()) {
-            IRingSet ringSet = new SSSRFinder(container).findSSSR();
-            RingSetManipulator.sort(ringSet);
-            RingSetManipulator.markAromaticRings(ringSet);
-            ringContainer = RingSetManipulator.getAllInOneContainer(ringSet);
-        }
 
         int position = -1;
+        this.ringFinder = ringFinder;
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-        CDKHueckelAromaticityDetector.detectAromaticity(container);
+        initializeMolecule(container);
         long after = System.currentTimeMillis();
         logger.debug("time for aromaticity calculation: "
                 + (after - before) + " milliseconds");
@@ -187,6 +177,7 @@ public class Fingerprinter implements IFingerprinter {
         int[] hashes = findPaths(container, searchDepth);
         for (int hash : hashes) {
             position = (int) RandomNumber.generateMersenneTwisterRandomNumber(size, hash);
+            uniquePaths.put(new Integer(position).toString(), hash);
             bitSet.set(position);
         }
 
@@ -214,7 +205,7 @@ public class Fingerprinter implements IFingerprinter {
      */
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
-        throw new UnsupportedOperationException();
+        return uniquePaths;
     }
 
     /**
@@ -250,7 +241,7 @@ public class Fingerprinter implements IFingerprinter {
                 } else {
                     Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
                     if (atnum != null) {
-                        sb.append(convertSymbol(x));
+                        sb.append(toAtomPattern(x));
                     } else {
                         sb.append((char) PeriodicTable.getElementCount() + 1);
                     }
@@ -272,7 +263,7 @@ public class Fingerprinter implements IFingerprinter {
                                 });
                     }
                     sb.append(getBondSymbol(b[0]));
-                    sb.append(convertSymbol(y[0]));
+                    sb.append(toAtomPattern(y[0]));
                     x = y[0];
                 }
 
@@ -316,13 +307,13 @@ public class Fingerprinter implements IFingerprinter {
         return hashes;
     }
 
-    private String convertSymbol(IAtom atom) {
+    private String toAtomPattern(IAtom atom) {
         Double charge = atom.getCharge() == null ? 0. : atom.getCharge();
         Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
         Integer atomNum = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
         int isRingAtom = 0;
         if (isRespectRingMatches()) {
-            isRingAtom = ringContainer.contains(atom) == true ? 1 : 0;
+            isRingAtom = atom.getFlag(CDKConstants.ISINRING) ? 1 : 0;
         }
 
         String atomConfiguration = atom.getSymbol()
@@ -358,7 +349,12 @@ public class Fingerprinter implements IFingerprinter {
         return bondSymbol;
     }
 
+    /**
+     * 
+     * @return
+     */
     @TestMethod("testGetSearchDepth")
+    @Override
     public int getSearchDepth() {
         return searchDepth;
     }
@@ -382,6 +378,7 @@ public class Fingerprinter implements IFingerprinter {
      * Should match rings to rings and non-rings to non-rings
      * @return the respect ring matches
      */
+    @Override
     public boolean isRespectRingMatches() {
         return respectRingMatches;
     }
@@ -392,7 +389,162 @@ public class Fingerprinter implements IFingerprinter {
      * @param respectRingMatches respect the ring-to-ring matches 
      * and discard non-ring to ring matches
      */
+    @Override
     public void setRespectRingMatches(boolean respectRingMatches) {
         this.respectRingMatches = respectRingMatches;
+    }
+
+    /**
+     * Prepare the target molecule for analysis. <p/> We perform ring perception and aromaticity detection and set up
+     * the appropriate properties. Right now, this function is called each time we need to do a query and this is
+     * inefficient.
+     *
+     * @throws CDKException if there is a problem in ring perception or aromaticity detection, which is usually related
+     *                      to a timeout in the ring finding code.
+     */
+    private Integer initializeMolecule(IAtomContainer atomContainer) throws CDKException {
+        Integer hashRings = 0;
+        Map<String, Integer> valencesTable = new HashMap<String, Integer>();
+        valencesTable.put("H", 1);
+        valencesTable.put("Li", 1);
+        valencesTable.put("Be", 2);
+        valencesTable.put("B", 3);
+        valencesTable.put("C", 4);
+        valencesTable.put("N", 5);
+        valencesTable.put("O", 6);
+        valencesTable.put("F", 7);
+        valencesTable.put("Na", 1);
+        valencesTable.put("Mg", 2);
+        valencesTable.put("Al", 3);
+        valencesTable.put("Si", 4);
+        valencesTable.put("P", 5);
+        valencesTable.put("S", 6);
+        valencesTable.put("Cl", 7);
+        valencesTable.put("K", 1);
+        valencesTable.put("Ca", 2);
+        valencesTable.put("Ga", 3);
+        valencesTable.put("Ge", 4);
+        valencesTable.put("As", 5);
+        valencesTable.put("Se", 6);
+        valencesTable.put("Br", 7);
+        valencesTable.put("Rb", 1);
+        valencesTable.put("Sr", 2);
+        valencesTable.put("In", 3);
+        valencesTable.put("Sn", 4);
+        valencesTable.put("Sb", 5);
+        valencesTable.put("Te", 6);
+        valencesTable.put("I", 7);
+        valencesTable.put("Cs", 1);
+        valencesTable.put("Ba", 2);
+        valencesTable.put("Tl", 3);
+        valencesTable.put("Pb", 4);
+        valencesTable.put("Bi", 5);
+        valencesTable.put("Po", 6);
+        valencesTable.put("At", 7);
+        valencesTable.put("Fr", 1);
+        valencesTable.put("Ra", 2);
+        valencesTable.put("Cu", 2);
+        valencesTable.put("Mn", 2);
+        valencesTable.put("Co", 2);
+
+        // do all ring perception
+
+        if (ringFinder == null) {
+            ringFinder = new AllRingsFinder();
+            ringFinder.setTimeout(5000);
+        }
+
+        IRingSet allRings;
+        try {
+            allRings = ringFinder.findAllRings(atomContainer);
+            hashRings = allRings.getAtomContainerCount() == 0 ? 0 : 1;
+        } catch (CDKException e) {
+            logger.debug(e.toString());
+            throw new CDKException(e.toString(), e);
+        }
+
+        // sets SSSR information
+        SSSRFinder finder = new SSSRFinder(atomContainer);
+        IRingSet sssr = finder.findEssentialRings();
+
+        for (IAtom atom : atomContainer.atoms()) {
+
+            // add a property to each ring atom that will be an array of
+            // Integers, indicating what size ring the given atom belongs to
+            // Add SSSR ring counts
+            if (allRings.contains(atom)) { // it's in a ring
+                atom.setFlag(CDKConstants.ISINRING, true);
+                atom.setFlag(CDKConstants.ISALIPHATIC, false);
+                // lets find which ring sets it is a part of
+                List<Integer> ringsizes = new ArrayList<Integer>();
+                IRingSet currentRings = allRings.getRings(atom);
+                int min = 0;
+                for (int i = 0; i < currentRings.getAtomContainerCount(); i++) {
+                    int ringSize = currentRings.getAtomContainer(i).getAtomCount();
+                    if (min > ringSize) {
+                        min = ringSize;
+                    }
+                    ringsizes.add(ringSize);
+                }
+                atom.setProperty(CDKConstants.RING_SIZES, ringsizes);
+                atom.setProperty(CDKConstants.SMALLEST_RINGS, sssr.getRings(atom));
+            } else {
+                atom.setFlag(CDKConstants.ISINRING, false);
+                atom.setFlag(CDKConstants.ISALIPHATIC, true);
+            }
+
+            // determine how many rings bonds each atom is a part of
+            int hCount;
+            if (atom.getImplicitHydrogenCount() == CDKConstants.UNSET) {
+                hCount = 0;
+            } else {
+                hCount = atom.getImplicitHydrogenCount();
+            }
+
+            List<IAtom> connectedAtoms = atomContainer.getConnectedAtomsList(atom);
+            int total = hCount + connectedAtoms.size();
+            for (IAtom connectedAtom : connectedAtoms) {
+                if (connectedAtom.getSymbol().equals("H")) {
+                    hCount++;
+                }
+            }
+            atom.setProperty(CDKConstants.TOTAL_CONNECTIONS, total);
+            atom.setProperty(CDKConstants.TOTAL_H_COUNT, hCount);
+
+            if (valencesTable.get(atom.getSymbol()) != null) {
+                int formalCharge = atom.getFormalCharge() == CDKConstants.UNSET ? 0 : atom.getFormalCharge();
+                atom.setValency(valencesTable.get(atom.getSymbol()) - formalCharge);
+            }
+        }
+
+        for (IBond bond : atomContainer.bonds()) {
+            if (allRings.getRings(bond).getAtomContainerCount() > 0) {
+                bond.setFlag(CDKConstants.ISINRING, true);
+                bond.setFlag(CDKConstants.ISALIPHATIC, false);
+            }
+        }
+
+        for (IAtom atom : atomContainer.atoms()) {
+            List<IAtom> connectedAtoms = atomContainer.getConnectedAtomsList(atom);
+
+            int counter = 0;
+            IAtom any;
+            for (IAtom connectedAtom : connectedAtoms) {
+                any = connectedAtom;
+                if (any.getFlag(CDKConstants.ISINRING)) {
+                    counter++;
+                }
+            }
+            atom.setProperty(CDKConstants.RING_CONNECTIONS, counter);
+        }
+
+        // check for atomaticity
+        try {
+            CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
+        } catch (CDKException e) {
+            logger.debug(e.toString());
+            throw new CDKException(e.toString(), e);
+        }
+        return hashRings;
     }
 }

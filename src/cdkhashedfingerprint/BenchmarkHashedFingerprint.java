@@ -17,6 +17,7 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
 /**
@@ -32,7 +33,7 @@ public class BenchmarkHashedFingerprint extends Base {
     private static long HITS;
     private static Map<String, Data> dataMap = new HashMap<String, Data>();
     private static IFingerprinter cdkFingerprint = new org.openscience.cdk.fingerprint.Fingerprinter(1024);
-    private static IFingerprinter fingerprint = new fingerprints.Fingerprinter(1024);
+    private static fingerprints.Fingerprinter fingerprint = new fingerprints.Fingerprinter(1024);
 
     /**
      * @param args the command line arguments
@@ -62,6 +63,10 @@ public class BenchmarkHashedFingerprint extends Base {
         System.out.print("FPR:" + "\t");
         System.out.println("Time (mins): ");
 
+        if (args[2].equals("1")) {
+            fingerprint.setRespectRingMatches(true);
+        }
+
         for (int k = interval; k < molecules.size(); k += interval) {
             for (String inchiKey : molecules.keySet()) {
                 IAtomContainer ac = molecules.get(inchiKey);
@@ -69,12 +74,13 @@ public class BenchmarkHashedFingerprint extends Base {
                     continue;
                 }
                 try {
-                    BitSet hashedFingerPrint;
+                    BitSet hashedFingerPrint = null;
                     if (args.length > 1 && args[1].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac);
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 1 && args[1].equals("new")) {
-                        hashedFingerPrint = getNewFingerprint(ac);
+                    }
+                    if (args.length > 1 && args[1].equals("new")) {
+                        hashedFingerPrint = getNewFingerprint(args, ac);
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
                 } catch (Exception e) {
@@ -99,23 +105,39 @@ public class BenchmarkHashedFingerprint extends Base {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-                    VF2 sub;
-                    if (args[2].equals("1")) {
-                        sub = new VF2(true, true);
-                    } else {
-                        sub = new VF2(true, false);
-                    }
-                    sub.set(fragment.getAtomContainer(), original.getAtomContainer());
-                    boolean TrueMatch = sub.isSubgraph();
+//                    VF2 sub = new VF2(true, false);
+////                    if (args[2].equals("1")) {
+////                        sub = new VF2(true, true);
+////                    }
+////                    if (args[2].equals("2")) {
+////                        sub = new VF2(true, false);
+////                    }
+//                    sub.set(fragment.getAtomContainer(), original.getAtomContainer());
+//                    boolean TrueMatch = sub.isSubgraph();
 
+
+                    boolean TrueMatch = UniversalIsomorphismTester.isSubgraph(original.getAtomContainer(), fragment.getAtomContainer());
                     if (FPMatch && TrueMatch) {
                         TP++;
                     }
                     if (FPMatch && !TrueMatch) {
                         FP++;
+//                        System.out.println("\n FP FPMATCH && !TrueMatch");
+//                        System.out.println("Atom count Q:" + fragment.getAtomContainer().getAtomCount());
+//                        System.out.println("Atom count T:" + original.getAtomContainer().getAtomCount());
+//                        System.out.println(fragment.getAtomContainer().getID() + " fpQ " + fragment.getFingerprint().toString());
+//                        System.out.println(original.getAtomContainer().getID() + " fpT " + original.getFingerprint().toString());
+//                        System.out.println("isSubset: " + FPMatch);
+
                     }
                     if (!FPMatch && TrueMatch) {
                         FN++;
+//                        System.out.println("\n FN !FPMATCH && TrueMatch");
+//                        System.out.println("Atom count Q:" + fragment.getAtomContainer().getAtomCount());
+//                        System.out.println("Atom count T:" + original.getAtomContainer().getAtomCount());
+//                        System.out.println(fragment.getAtomContainer().getID() + " fpQ " + fragment.getFingerprint().toString());
+//                        System.out.println(original.getAtomContainer().getID() + " fpT " + original.getFingerprint().toString());
+//                        System.out.println("isSubset: " + FPMatch);
                     }
                     if (!FPMatch && !TrueMatch) {
                         TN++;
@@ -158,7 +180,7 @@ public class BenchmarkHashedFingerprint extends Base {
         return cdkFingerprint.getFingerprint(ac);
     }
 
-    private static BitSet getNewFingerprint(IAtomContainer ac) throws CDKException {
+    private static BitSet getNewFingerprint(String[] args, IAtomContainer ac) throws CDKException {
         return fingerprint.getFingerprint(ac);
     }
 }
