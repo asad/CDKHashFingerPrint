@@ -5,6 +5,7 @@
 package fingerprints;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.BitSet;
 import junit.framework.Assert;
@@ -19,21 +20,20 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
-
-
 /**
  *
  * @author Asad
  */
 public class FingerprinterTest {
-
+    
     public static void main(String[] args) throws InvalidSmilesException, Exception {
         testGenerateFingerprint();
         testGenerateFingerprintIsSubset();
-        testGenerateFingerprintIsNotASubset();
+        testGenerateFingerprintIsNotASubset1();
         testGenerateFingerprintIsNotASubset2();
+        testGenerateFingerprintIsNotASubset3();
     }
-
+    
     public FingerprinterTest() {
     }
 
@@ -44,7 +44,7 @@ public class FingerprinterTest {
      */
     @Test
     public static void testGenerateFingerprint() throws InvalidSmilesException, CDKException {
-
+        
         String smiles = "CCCCC1C(=O)N(N(C1=O)C1=CC=CC=C1)C1=CC=CC=C1";
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
@@ -62,7 +62,7 @@ public class FingerprinterTest {
      */
     @Test
     public static void testGenerateFingerprintIsSubset() throws InvalidSmilesException, CDKException {
-
+        
         String smilesT =
                 "NC(=O)C1=C2C=CC(Br)=CC2=C(Cl)C=C1";
         String smilesQ = "CC1=C2C=CC(Br)=CC2=C(Cl)C=C1";
@@ -76,45 +76,47 @@ public class FingerprinterTest {
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getFingerprint(moleculeQ);
         fingerprintT = fingerprint.getFingerprint(moleculeT);
-
+        
         System.out.println("fpQ " + fingerprintQ.toString());
         System.out.println("fpT " + fingerprintT.toString());
         System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
-
+        
         Assert.assertTrue(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
     }
 
     /**
-    //     * Test of Fingerprinter method
-    //     * @throws InvalidSmilesException
-    //     * @throws CDKException  
-    //     */
-//    @Test
-//    public static void testGenerateFingerprintIsNotASubset() throws InvalidSmilesException, CDKException, FileNotFoundException, FileNotFoundException {
-//
-//        String smilesT =
-//                "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
-//        String smilesQ = "OC[C@@H](O)[C@@H](O)[C@H](O)[C@@H](O)C(O)=O";
-//        SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-//        IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
-//        IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
-//        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
-//        System.out.println("Atom count T:" + moleculeT.getAtomCount());
-//        IFingerprinter fingerprint = new Fingerprinter(1024);
-//        BitSet fingerprintQ;
-//        BitSet fingerprintT;
-//        fingerprintQ = fingerprint.getFingerprint(moleculeQ);
-//        fingerprintT = fingerprint.getFingerprint(moleculeT);
-//
-//        System.out.println("fpQ " + fingerprintQ.toString());
-//        System.out.println("fpT " + fingerprintT.toString());
-//        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
-//
-//        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
-//    }
+     * Test of Fingerprinter method
+     * @throws InvalidSmilesException
+     * @throws CDKException
+     * @throws FileNotFoundException  
+     */
     @Test
-    public static void testGenerateFingerprintIsNotASubset() throws InvalidSmilesException, Exception {
+    public static void testGenerateFingerprintIsNotASubset1() throws InvalidSmilesException, CDKException, FileNotFoundException, FileNotFoundException {
+        
+        String smilesT =
+                "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
+        String smilesQ = "OC[C@@H](O)[C@@H](O)[C@H](O)[C@@H](O)C(O)=O";
+        SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+        IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
+        IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
+        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+        IFingerprinter fingerprint = new Fingerprinter(1024);
+        BitSet fingerprintQ;
+        BitSet fingerprintT;
+        fingerprintQ = fingerprint.getFingerprint(moleculeQ);
+        fingerprintT = fingerprint.getFingerprint(moleculeT);
+        
+        System.out.println("fpQ " + fingerprintQ.toString());
+        System.out.println("fpT " + fingerprintT.toString());
+        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+        
+        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+    }
 
+    @Test
+    public static void testGenerateFingerprintIsNotASubset2() throws InvalidSmilesException, Exception {
+        
         FileReader smilesQ =
                 new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00137.mol");
         FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00257.mol");
@@ -132,17 +134,17 @@ public class FingerprinterTest {
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getFingerprint(moleculeQ);
         fingerprintT = fingerprint.getFingerprint(moleculeT);
-
+        
         System.out.println("fpQ " + fingerprintQ.toString());
         System.out.println("fpT " + fingerprintT.toString());
         System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
-
+        
         Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
     }
-
+    
     @Test
-    public static void testGenerateFingerprintIsNotASubset2() throws InvalidSmilesException, Exception {
-
+    public static void testGenerateFingerprintIsNotASubset3() throws InvalidSmilesException, Exception {
+        
         FileReader smilesQ =
                 new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00186.mol");
         FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00021.mol");
@@ -162,14 +164,14 @@ public class FingerprinterTest {
         
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
         IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
-
+        
         fingerprintQ = fingerprint.getFingerprint(removeHydrogens);
         fingerprintT = fingerprint.getFingerprint(removeHydrogens1);
-
-        System.out.println(moleculeQ.getID() +" fpQ " + fingerprintQ.toString());
-        System.out.println(moleculeT.getID() +" fpT " + fingerprintT.toString());
+        
+        System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
+        System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());
         System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
-
+        
         Assert.assertFalse(FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
     }
 }
