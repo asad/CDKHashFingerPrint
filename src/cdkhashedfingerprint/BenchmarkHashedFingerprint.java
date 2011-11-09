@@ -19,8 +19,13 @@ import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
-/**
- *
+/** 
+ *  Test default new FP with ring matcher
+ *  java -jar dist/CDKHashedFingerprint.jar test/data/mol new
+ *  Test new FP with ring matcher
+ *  java -jar dist/CDKHashedFingerprint.jar test/data/mol new  1
+ *  Test CDK default FP with ring matcher
+ *  java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk 
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
 public class BenchmarkHashedFingerprint extends Base {
@@ -62,7 +67,7 @@ public class BenchmarkHashedFingerprint extends Base {
         System.out.print("FPR:" + "\t");
         System.out.println("Time (mins): ");
 
-        if (args[2].equals("1")) {
+        if (args.length > 2 && args[2].equals("1")) {
             fingerprint.setRespectRingMatches(true);
         }
 
@@ -104,13 +109,7 @@ public class BenchmarkHashedFingerprint extends Base {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-                    VF2 sub = null;
-                    if (args[2].equals("1")) {
-                        sub = new VF2(true, true);
-                    }
-                    if (args[2].equals("2")) {
-                        sub = new VF2(true, false);
-                    }
+                    VF2 sub = sub = new VF2(true, false);
                     sub.set(fragment.getAtomContainer(), original.getAtomContainer());
                     boolean TrueMatch = sub.isSubgraph();
 
@@ -120,22 +119,9 @@ public class BenchmarkHashedFingerprint extends Base {
                     }
                     if (FPMatch && !TrueMatch) {
                         FP++;
-//                        System.out.println("\n FP FPMATCH && !TrueMatch");
-//                        System.out.println("Atom count Q:" + fragment.getAtomContainer().getAtomCount());
-//                        System.out.println("Atom count T:" + original.getAtomContainer().getAtomCount());
-//                        System.out.println(fragment.getAtomContainer().getID() + " fpQ " + fragment.getFingerprint().toString());
-//                        System.out.println(original.getAtomContainer().getID() + " fpT " + original.getFingerprint().toString());
-//                        System.out.println("isSubset: " + FPMatch);
-
                     }
                     if (!FPMatch && TrueMatch) {
                         FN++;
-//                        System.out.println("\n FN !FPMATCH && TrueMatch");
-//                        System.out.println("Atom count Q:" + fragment.getAtomContainer().getAtomCount());
-//                        System.out.println("Atom count T:" + original.getAtomContainer().getAtomCount());
-//                        System.out.println(fragment.getAtomContainer().getID() + " fpQ " + fragment.getFingerprint().toString());
-//                        System.out.println(original.getAtomContainer().getID() + " fpT " + original.getFingerprint().toString());
-//                        System.out.println("isSubset: " + FPMatch);
                     }
                     if (!FPMatch && !TrueMatch) {
                         TN++;
