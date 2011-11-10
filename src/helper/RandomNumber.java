@@ -24,8 +24,8 @@ public class RandomNumber {
         RandomGenerator rg = new RandomAdaptor(new MersenneTwister(hashCode));
         return rg.nextInt(maximum);
     }
-    
-        /**
+
+    /**
      * Mersenne Twister Random Number
      * @param maximum
      * @return
