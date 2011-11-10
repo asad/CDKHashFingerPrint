@@ -20,7 +20,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
 /** 
- *  Test default new FP with ring matcher
+ *  Test new FP 
  *  java -jar dist/CDKHashedFingerprint.jar test/data/mol new  2  1000
  *  Test new FP with ring matcher
  *  java -jar dist/CDKHashedFingerprint.jar test/data/mol new  1  1000
