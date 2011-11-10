@@ -16,6 +16,7 @@ import org.openscience.cdk.ringsearch.AllRingsFinder;
  * @author Asad
  */
 public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerprinter {
+
     /**
      * The default search depth used to create the fingerprints.
      */
@@ -23,7 +24,7 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
     /**
      * The default length of created fingerprints.
      */
-    int DEFAULT_SIZE = 2048;
+    int DEFAULT_SIZE = 1024;
 
     /**
      * Generates a fingerprint of the default size for the given AtomContainer.
@@ -82,5 +83,4 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
      * and discard non-ring to ring matches
      */
     void setRespectRingMatches(boolean respectRingMatches);
-    
 }
