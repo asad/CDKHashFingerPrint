@@ -29,7 +29,7 @@ import org.openscience.smsd.algorithm.vflib.substructure.VF2;
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
 public class BenchmarkHashedFingerprint extends Base {
-    
+
     private static long TP;
     private static long FP;
     private static long FN;
@@ -52,12 +52,15 @@ public class BenchmarkHashedFingerprint extends Base {
         if (args.length >= 4) {
             expectedDataSize = Integer.valueOf(args[3]);
         }
+        System.out.print("\n***************************************\n");
+
         Map<String, IAtomContainer> molecules =
                 readMDLMolecules(directory, expectedDataSize);
         System.out.println("\rTotal number of mols read: " + molecules.size());
         int interval = (int) (0.10 * molecules.size());
         System.out.println("Intervals between data points: " + interval);
         System.out.print("\n***************************************\n");
+        System.out.print("\n------------------------------------------------------------------------------\n");
         System.out.print("CASES:" + "\t\t");
         System.out.print("TP:" + "\t");
         System.out.print("FP:" + "\t");
@@ -69,12 +72,12 @@ public class BenchmarkHashedFingerprint extends Base {
         /*FALSE POSITIVE RATE*/
         System.out.print("FPR:" + "\t");
         System.out.println("Time (mins): ");
-        System.out.print("\n---------------------------------------\n");
-        
+        System.out.print("------------------------------------------------------------------------------\n");
+
         if (args.length > 2 && args[2].equals("1")) {
             fingerprint.setRespectRingMatches(true);
         }
-        
+
         for (int k = 0; k < molecules.size(); k += interval) {
             int counter = 1;
             for (String inchiKey : molecules.keySet()) {
@@ -96,18 +99,18 @@ public class BenchmarkHashedFingerprint extends Base {
                     e.printStackTrace();
                     System.err.println("error in generating fp: " + ac.getID());
                 }
-                
+
                 if (counter++ == interval) {
                     break;
                 }
             }
-            
+
             TP = 0;
             FP = 0;
             FN = 0;
             TN = 0;
             HITS = 0;
-            
+
             long startTime = System.currentTimeMillis();
             for (Data fragment : dataMap.values()) {
                 for (Data original : dataMap.values()) {
@@ -117,8 +120,8 @@ public class BenchmarkHashedFingerprint extends Base {
                     VF2 sub = sub = new VF2(true, false);
                     sub.set(fragment.getAtomContainer(), original.getAtomContainer());
                     boolean TrueMatch = sub.isSubgraph();
-                    
-                    
+
+
                     if (FPMatch && TrueMatch) {
                         TP++;
                     } else if (FPMatch && !TrueMatch) {
@@ -131,7 +134,7 @@ public class BenchmarkHashedFingerprint extends Base {
                     HITS++;
                 }
             }
-            
+
             System.out.print(dataMap.size() + "*" + dataMap.size() + "\t\t");
             System.out.print(TP + "\t");
             System.out.print(FP + "\t");
@@ -142,30 +145,30 @@ public class BenchmarkHashedFingerprint extends Base {
             System.out.print(getFPR() + "\t");
             System.out.println(getElapsedTime(startTime));
         }
-        System.out.print("\n***************************************\n");
+        
     }
-    
+
     private static BigDecimal getFPR() {
         return FP == 0 ? new BigDecimal(0.000) : new BigDecimal(FP).divide(new BigDecimal(FP + TN), 3, BigDecimal.ROUND_HALF_UP);
     }
-    
+
     private static BigDecimal getTPR() {
         return TP == 0 ? new BigDecimal(0.000) : new BigDecimal(TP).divide(new BigDecimal(TP + FN), 3, BigDecimal.ROUND_HALF_UP);
     }
-    
+
     private static BigDecimal getAccuracy() {
         return new BigDecimal(TP + TN).divide(new BigDecimal(HITS), 3, BigDecimal.ROUND_HALF_UP);
     }
-    
+
     private static String getElapsedTime(long startTime) {
         DecimalFormat df = new DecimalFormat("#.##");
         return df.format((System.currentTimeMillis() - startTime) / (1000 * 60.0)); //*60 for hrs
     }
-    
+
     private static BitSet getCDKFingerprint(IAtomContainer ac) throws CDKException {
         return cdkFingerprint.getFingerprint(ac);
     }
-    
+
     private static BitSet getNewFingerprint(String[] args, IAtomContainer ac) throws CDKException {
         return fingerprint.getFingerprint(ac);
     }
