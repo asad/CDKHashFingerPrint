@@ -90,8 +90,8 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *  high. </font>
  *  </p>
  *
- * @author         Syed Asad Rahman
- * @cdk.created    2002-02-24
+ * @author         Syed Asad Rahman (2011), Christoph Steinbeck (2002-2007)
+ * @cdk.created    07-11-2011
  * @cdk.keyword    fingerprint
  * @cdk.keyword    similarity
  * @cdk.module     standard
@@ -339,14 +339,15 @@ public class Fingerprinter implements IFingerprinter {
     protected String getBondSymbol(IBond bond) {
         String bondSymbol = "";
         if (bond.getFlag(CDKConstants.ISAROMATIC)) {
-            bondSymbol = "@";
+            bondSymbol += "@";
         } else if (bond.getOrder() == IBond.Order.SINGLE) {
-            bondSymbol = "-";
+            bondSymbol += "-";
         } else if (bond.getOrder() == IBond.Order.DOUBLE) {
-            bondSymbol = "=";
+            bondSymbol += "=";
         } else if (bond.getOrder() == IBond.Order.TRIPLE) {
-            bondSymbol = "#";
+            bondSymbol += "#";
         }
+
         return bondSymbol;
     }
 

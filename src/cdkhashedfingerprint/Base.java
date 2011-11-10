@@ -64,8 +64,8 @@ public class Base {
      * @throws IOException  
      */
     public static Map<String, IAtomContainer> readMDLMolecules(File dir, int cutoff) throws FileNotFoundException, CDKException, IOException {
+        System.out.println("\nReading Files: ");
         Map<String, IAtomContainer> inchiMolMap = new HashMap<String, IAtomContainer>();
-
         if (dir.isDirectory()) {
             File[] listFiles = dir.listFiles();
             for (File fileIndex : listFiles) {
@@ -84,8 +84,10 @@ public class Base {
                         Logger.getLogger(Base.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    if (cutoff == inchiMolMap.size()) {
+                    if ((cutoff - inchiMolMap.size()) == 0) {
                         break;
+                    } else {
+                        System.out.print("\r# " + (cutoff - inchiMolMap.size()));
                     }
                     reader.close();
                 }

@@ -23,7 +23,7 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
     /**
      * The default length of created fingerprints.
      */
-    int DEFAULT_SIZE = 1024;
+    int DEFAULT_SIZE = 2048;
 
     /**
      * Generates a fingerprint of the default size for the given AtomContainer.
