@@ -21,11 +21,11 @@ import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
 /** 
  *  Test new FP 
- *  java -jar dist/CDKHashedFingerprint.jar test/data/mol new  2  1000
- *  Test new FP with ring matcher
- *  java -jar dist/CDKHashedFingerprint.jar test/data/mol new  1  1000
- *  Test CDK default FP with ring matcher
- *  java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk  2  1000
+ *java -jar dist/CDKHashedFingerprint.jar test/data/mol new  2  1000
+ * Test CDK default FP
+ *java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk  2  1000
+ * Test new FP with ring matcher 
+ *java -jar dist/CDKHashedFingerprint.jar test/data/mol new  1  1000
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
 public class BenchmarkHashedFingerprint extends Base {
@@ -145,7 +145,7 @@ public class BenchmarkHashedFingerprint extends Base {
             System.out.print(getFPR() + "\t");
             System.out.println(getElapsedTime(startTime));
         }
-        
+
     }
 
     private static BigDecimal getFPR() {
