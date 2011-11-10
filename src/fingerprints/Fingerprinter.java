@@ -26,7 +26,6 @@
  */
 package fingerprints;
 
-import helper.RandomNumber;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -98,7 +97,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * @cdk.githash
  */
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
-public class Fingerprinter implements IFingerprinter {
+public class Fingerprinter extends RandomNumber implements IFingerprinter {
 
     private int size;
     private boolean respectRingMatches;
@@ -173,7 +172,7 @@ public class Fingerprinter implements IFingerprinter {
 
         hashes = findPaths(container, searchDepth);
         for (int hash : hashes) {
-            position = (int) RandomNumber.generateMersenneTwisterRandomNumber(size, hash);
+            position = (int) generateMersenneTwisterRandomNumber(size, hash);
             bitSet.set(position);
         }
 
@@ -203,7 +202,7 @@ public class Fingerprinter implements IFingerprinter {
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
         for (int hash : hashes) {
-            int position = (int) RandomNumber.generateMersenneTwisterRandomNumber(size, hash);
+            int position = (int) generateMersenneTwisterRandomNumber(size, hash);
             uniquePaths.put(new Integer(position).toString(), hash);
         }
         return uniquePaths;

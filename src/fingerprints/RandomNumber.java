@@ -23,41 +23,40 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package helper;
+package fingerprints;
 
-import java.util.BitSet;
-import org.openscience.cdk.interfaces.IAtomContainer;
+import org.apache.commons.math.random.MersenneTwister;
+import org.apache.commons.math.random.RandomAdaptor;
+import org.apache.commons.math.random.RandomGenerator;
 
 /**
- *
- * @author Syed Asad Rahman <asad@ebi.ac.uk>
+ * @author         Syed Asad Rahman (2011)
+ * @cdk.created    07-11-2011
+ * @cdk.keyword    fingerprint
+ * @cdk.keyword    similarity
+ * @cdk.module     standard
  */
-public class Data {
-
-    private BitSet fingerprint;
-    private IAtomContainer atomContainer;
+public class RandomNumber {
 
     /**
-     * Store the fingerprint and its structure
-     * @param fingerprint
-     * @param atomContainer
+     * Mersenne Twister Random Number 
+     * for a hashcode within a range between 0 to maximum 
+     * @param maximum
+     * @param hashCode
+     * @return
      */
-    public Data(BitSet fingerprint, IAtomContainer atomContainer) {
-        this.fingerprint = fingerprint;
-        this.atomContainer = atomContainer;
+    public static long generateMersenneTwisterRandomNumber(int maximum, long hashCode) {
+        RandomGenerator rg = new RandomAdaptor(new MersenneTwister(hashCode));
+        return rg.nextInt(maximum);
     }
 
     /**
-     * @return the fingerprint
+     * Mersenne Twister Random Number
+     * @param maximum
+     * @return
      */
-    public BitSet getFingerprint() {
-        return fingerprint;
-    }
-
-    /**
-     * @return the atomContainer
-     */
-    public IAtomContainer getAtomContainer() {
-        return atomContainer;
+    public static long generateMersenneTwisterRandomNumber(int maximum) {
+        RandomGenerator rg = new RandomAdaptor(new MersenneTwister());
+        return rg.nextInt(maximum);
     }
 }
