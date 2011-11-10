@@ -58,7 +58,7 @@ public class BenchmarkHashedFingerprint extends Base {
         int interval = (int) (0.10 * molecules.size());
         System.out.println("Intervals between data points: " + interval);
         System.out.print("\n***************************************\n");
-        System.out.print("#CASES:" + "\t\t");
+        System.out.print("CASES:" + "\t\t");
         System.out.print("TP:" + "\t");
         System.out.print("FP:" + "\t");
         System.out.print("TN:" + "\t");
@@ -69,6 +69,7 @@ public class BenchmarkHashedFingerprint extends Base {
         /*FALSE POSITIVE RATE*/
         System.out.print("FPR:" + "\t");
         System.out.println("Time (mins): ");
+        System.out.print("\n---------------------------------------\n");
         
         if (args.length > 2 && args[2].equals("1")) {
             fingerprint.setRespectRingMatches(true);
