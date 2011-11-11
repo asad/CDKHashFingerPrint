@@ -138,10 +138,8 @@ public class BenchmarkHashedFingerprint extends Base {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-                    VF2 sub = sub = new VF2(true, false);
-                    sub.set(fragment.getAtomContainer(), original.getAtomContainer());
+                    VF2 sub = sub = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, false);
                     boolean TrueMatch = sub.isSubgraph();
-
 
                     if (FPMatch && TrueMatch) {
                         TP++;
