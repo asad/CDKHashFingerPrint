@@ -35,7 +35,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 public class Data {
 
     private BitSet fingerprint;
-    private IAtomContainer atomContainer;
+    private final IAtomContainer atomContainer;
 
     /**
      * Store the fingerprint and its structure
@@ -44,6 +44,14 @@ public class Data {
      */
     public Data(BitSet fingerprint, IAtomContainer atomContainer) {
         this.fingerprint = fingerprint;
+        this.atomContainer = atomContainer;
+    }
+
+    /**
+     * Store the fingerprint and its structure
+     * @param atomContainer
+     */
+    public Data(IAtomContainer atomContainer) {
         this.atomContainer = atomContainer;
     }
 
