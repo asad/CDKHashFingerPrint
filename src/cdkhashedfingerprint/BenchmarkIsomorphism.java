@@ -127,7 +127,6 @@ public class BenchmarkIsomorphism extends Base {
                             fragment.getAtomContainer());
                     TrueMatch = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, false).isSubgraph();
 
-
                     if (UIT && TrueMatch) {
                         TP++;
                     } else if (UIT && !TrueMatch) {
