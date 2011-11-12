@@ -27,11 +27,12 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 public class FingerprinterTest {
     
     public static void main(String[] args) throws InvalidSmilesException, Exception {
-        testGenerateFingerprint();
-        testGenerateFingerprintIsSubset();
-        testGenerateFingerprintIsNotASubset1();
-        testGenerateFingerprintIsNotASubset2();
-        testGenerateFingerprintIsNotASubset3();
+//        testGenerateFingerprint();
+//        testGenerateFingerprintIsSubset();
+//        testGenerateFingerprintIsNotASubset1();
+//        testGenerateFingerprintIsNotASubset2();
+//        testGenerateFingerprintIsNotASubset3();
+        testGenerateFingerprintIsNotASubset4();
     }
     
     public FingerprinterTest() {
@@ -97,7 +98,9 @@ public class FingerprinterTest {
                 "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
         String smilesQ = "OC[C@@H](O)[C@@H](O)[C@H](O)[C@@H](O)C(O)=O";
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+        smilesParser.setPreservingAromaticity(true);
         IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
+        
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
@@ -113,7 +116,7 @@ public class FingerprinterTest {
         
         Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
     }
-
+    
     @Test
     public static void testGenerateFingerprintIsNotASubset2() throws InvalidSmilesException, Exception {
         
@@ -154,6 +157,39 @@ public class FingerprinterTest {
         IAtomContainer moleculeT = (IAtomContainer) readerT.read(new Molecule());
         moleculeQ.setID("C00186");
         moleculeT.setID("C00021");
+        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+        IFingerprinter fingerprint = new Fingerprinter(1024);
+        BitSet fingerprintQ;
+        BitSet fingerprintT;
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
+        IAtomContainer removeHydrogens = AtomContainerManipulator.removeHydrogens(moleculeQ);
+        
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
+        IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
+        
+        fingerprintQ = fingerprint.getFingerprint(removeHydrogens);
+        fingerprintT = fingerprint.getFingerprint(removeHydrogens1);
+        
+        System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
+        System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());
+        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+        
+        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+    }
+    
+    @Test
+    public static void testGenerateFingerprintIsNotASubset4() throws InvalidSmilesException, Exception {
+        
+        FileReader smilesQ =
+                new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00107.mol");
+        FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00196.mol");
+        MDLV2000Reader readerQ = new MDLV2000Reader(smilesQ);
+        MDLV2000Reader readerT = new MDLV2000Reader(smilesT);
+        IAtomContainer moleculeQ = (IAtomContainer) readerQ.read(new Molecule());
+        IAtomContainer moleculeT = (IAtomContainer) readerT.read(new Molecule());
+        moleculeQ.setID("C00107");
+        moleculeT.setID("C00196");
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
         IFingerprinter fingerprint = new Fingerprinter(1024);
