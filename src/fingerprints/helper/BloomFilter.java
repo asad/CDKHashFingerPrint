@@ -25,8 +25,6 @@
  */
 package fingerprints.helper;
 
-import fingerprints.helper.BitSetIterable;
-import fingerprints.helper.RandomNumber;
 import java.io.Serializable;
 import java.util.BitSet;
 import java.util.Collection;
