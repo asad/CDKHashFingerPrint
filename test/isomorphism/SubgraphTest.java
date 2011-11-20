@@ -1,6 +1,6 @@
 package isomorphism;
 
-import fingerprints.Fingerprinter;
+import fingerprints.HashedFingerprinter;
 import fingerprints.interfaces.IFingerprinter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,7 +45,7 @@ public class SubgraphTest {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
         System.out.println("fp " + fingerprint1.toString());
