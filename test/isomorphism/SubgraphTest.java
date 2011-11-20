@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package isomorphism;
 
 import fingerprints.Fingerprinter;
-import fingerprints.IFingerprinter;
+import fingerprints2.interfaces.IFingerprinter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
