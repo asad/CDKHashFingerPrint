@@ -4,8 +4,7 @@
  */
 package fingerprints;
 
-import fingerprints2.HashedFingerprinter;
-import fingerprints2.interfaces.IFingerprinter;
+import fingerprints.interfaces.IFingerprinter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
