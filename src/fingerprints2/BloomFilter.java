@@ -23,7 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 package fingerprints2;
 
 import java.io.Serializable;
@@ -42,9 +41,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *
  * Copyright (c) Ian Clarke
  * Copyright (c) Syed Asad Rahman <asad@ebi.ac.uk>
- * @param <E> Object type that is to be inserted into the Bloom filter, e.g. String or Integer.
+ * @param <T> Bloom filter data/object type.
  */
-public class BloomFilter<E> extends RandomNumber implements Serializable {
+public class BloomFilter<T> extends RandomNumber implements Serializable {
 
     private static final long serialVersionUID = 0x2c67671896f80faL;
     protected final int k;
@@ -75,11 +74,12 @@ public class BloomFilter<E> extends RandomNumber implements Serializable {
             return false;
         }
         @SuppressWarnings("unchecked")
-        final BloomFilter<E> other = (BloomFilter<E>) obj;
+        final BloomFilter<T> other = (BloomFilter<T>) obj;
         if (this.k != other.k) {
             return false;
         }
-        if (this.bitSet != other.bitSet && (this.bitSet == null || !this.bitSet.equals(other.bitSet))) {
+        if (this.bitSet != other.bitSet && (this.bitSet == null 
+                || !this.bitSet.equals(other.bitSet))) {
             return false;
         }
         if (this.bitSetSize != other.bitSetSize) {
@@ -168,7 +168,7 @@ public class BloomFilter<E> extends RandomNumber implements Serializable {
      * 
      * @see java.util.Set#add(java.lang.Object)
      */
-    public boolean add(E o) {
+    public boolean add(T o) {
         int toHashCode = new HashCodeBuilder(17, 37).append(o).toHashCode();
         for (int i = 0; i < k; i++) {
             int position = (int) generateMersenneTwisterRandomNumber(bitSetSize, toHashCode);
@@ -181,9 +181,9 @@ public class BloomFilter<E> extends RandomNumber implements Serializable {
      * @param c 
      * @return This method will always return false
      */
-    public boolean addAll(Collection<? extends E> c) {
-        for (E o : c) {
-            add(o);
+    public boolean addAll(Collection<? extends T> c) {
+        for (T t : c) {
+            add(t);
         }
         return false;
     }
@@ -193,7 +193,7 @@ public class BloomFilter<E> extends RandomNumber implements Serializable {
      * Use getFalsePositiveProbability() to calculate the probability of this
      * being correct.
      * @param o object to check.
-     * @return False indicates that o was definitely not added to this Bloom Filter, 
+     * @return False indicates that t was definitely not added to this Bloom Filter, 
      *         true indicates that it probably was.  The probability can be estimated
      *         using the getExpectedFalsePositiveProbability() method.
      */
@@ -215,7 +215,7 @@ public class BloomFilter<E> extends RandomNumber implements Serializable {
      * @param c elements to check.
      * @return true if all the elements in c could have been inserted into the Bloom filter.
      */
-    public boolean containsAll(Collection<? extends E> c) {
+    public boolean containsAll(Collection<? extends T> c) {
         for (Object o : c) {
             if (!contains(o)) {
                 return false;
@@ -267,7 +267,7 @@ public class BloomFilter<E> extends RandomNumber implements Serializable {
      * @param other
      * @return
      */
-    public int intersect(BloomFilter<E> other) {
+    public int intersect(BloomFilter<T> other) {
         BitSet intersection = (BitSet) this.bitSet.clone();
         intersection.and(other.bitSet);
         return (intersection.cardinality() / bitSetSize);

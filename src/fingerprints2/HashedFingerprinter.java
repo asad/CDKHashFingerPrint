@@ -54,11 +54,11 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
 public class HashedFingerprinter extends RandomNumber implements IFingerprinter {
 
-    int fingerPrintSize = DEFAULT_SIZE;
+    private int fingerPrintSize;
     private BloomFilter<String> bloomFilter;
     private int ringBitCount;
     private boolean respectRingMatches;
-    private final int searchDepth;
+    private int searchDepth;
     static int debugCounter = 0;
     // do all ring perception
     private AllRingsFinder arf;
@@ -227,7 +227,6 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         BitSet walkBits = bloomFilter.toBitSet();
         BitSet result = new BitSet(getFingerprintLength());
         result.or(walkBits);
-
         if (isRespectRingMatches()) {
             Set<IAtomContainer> rings = new HashSet<IAtomContainer>();
             IRingSet allRings;
@@ -254,7 +253,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 int atomCount = ring.getAtomCount();
                 int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
                 int ringPosition = (int) generateMersenneTwisterRandomNumber(ringBitCount, toHashCode);
-                int index = bloomFilter.getBitArraySize() + (ringPosition - 4);
+                int index = bloomFilter.getBitArraySize() + (ringPosition - 2);
                 if (index < getFingerprintLength()) {
                     bitset.set(index);
                 }

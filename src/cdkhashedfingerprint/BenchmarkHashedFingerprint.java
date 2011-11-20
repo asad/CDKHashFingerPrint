@@ -99,6 +99,7 @@ public class BenchmarkHashedFingerprint extends Base {
 
         if (args.length > 2 && args[2].equals("1")) {
             fingerprint.setRespectRingMatches(true);
+            fingerprint2.setRespectRingMatches(true);
         }
 
         for (int k = 0; k < molecules.size(); k += interval) {
