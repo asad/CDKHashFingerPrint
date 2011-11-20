@@ -25,7 +25,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  *
  * @author Asad
  */
-public class FingerprinterTest {
+public class HashedBloomFingerprinterTest {
 
     public static void main(String[] args) throws InvalidSmilesException, Exception {
         testGenerateFingerprint();
@@ -36,11 +36,11 @@ public class FingerprinterTest {
         testGenerateFingerprintIsNotASubset4();
     }
 
-    public FingerprinterTest() {
+    public HashedBloomFingerprinterTest() {
     }
 
     /**
-     * Test of Fingerprinter method
+     * Test of HashedBloomFingerprinter method
      * @throws InvalidSmilesException
      * @throws CDKException  
      */
@@ -51,14 +51,14 @@ public class FingerprinterTest {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
         System.out.println("fp " + fingerprint1.toString());
     }
 
     /**
-     * Test of Fingerprinter method
+     * Test of HashedBloomFingerprinter method
      * @throws InvalidSmilesException
      * @throws CDKException  
      */
@@ -73,7 +73,7 @@ public class FingerprinterTest {
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getFingerprint(moleculeQ);
@@ -87,7 +87,7 @@ public class FingerprinterTest {
     }
 
     /**
-     * Test of Fingerprinter method
+     * Test of HashedBloomFingerprinter method
      * @throws InvalidSmilesException
      * @throws CDKException
      * @throws FileNotFoundException  
@@ -105,7 +105,7 @@ public class FingerprinterTest {
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getFingerprint(moleculeQ);
@@ -132,7 +132,7 @@ public class FingerprinterTest {
         moleculeT.setID((smilesT.toString().split(".mol"))[0]);
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         BitSet fingerprintQ;
         BitSet fingerprintT;
@@ -160,7 +160,7 @@ public class FingerprinterTest {
         moleculeT.setID("C00021");
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
@@ -193,7 +193,7 @@ public class FingerprinterTest {
         moleculeT.setID("C00196");
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        IFingerprinter fingerprint = new Fingerprinter(1024);
+        IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
