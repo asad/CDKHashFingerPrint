@@ -204,7 +204,7 @@ public class HashedFingerprinterTest {
         IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
 
         fingerprintQ = fingerprint.getFingerprint(removeHydrogens);
-        fingerprintT = fingerprint.getFingerprint(removeHydrogens1);
+        fingerprintT = fingerprint.getFingerprint(removeHydrogens1);      
 
         System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
         System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());
