@@ -26,31 +26,29 @@
  */
 package fingerprints;
 
-import fingerprints2.interfaces.IFingerprinter;
+import fingerprints.helper.MoleculeWalker;
+import fingerprints.helper.RandomNumber;
+import fingerprints.interfaces.IFingerprinter;
+import fingerprints.interfaces.IWalker;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.RingSet;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.graph.PathTools;
-import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IBond;
-import org.openscience.cdk.interfaces.IPseudoAtom;
+import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
+import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
-import org.openscience.cdk.tools.periodictable.PeriodicTable;
+import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 
 /**
  *  Generates a fingerprint for a given AtomContainer. Fingerprints are
@@ -67,7 +65,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *   BitSet fingerprint = fingerprinter.getFingerprint(molecule);
  *   This will match ring system with rings.
  *   fingerprinter.setRespectRingMatches(true);
- *   fingerprint.size(); // returns 1024 by default
+ *   fingerprint.fingerprintLength(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
  * </pre> <p>
  *
@@ -100,22 +98,13 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
 public class Fingerprinter extends RandomNumber implements IFingerprinter {
 
-    private int size;
+    private int fingerprintLength;
     private boolean respectRingMatches;
     private int searchDepth;
     static int debugCounter = 0;
-    private static int[] hashes;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(Fingerprinter.class);
-    private static final Map<String, String> patterns = new HashMap<String, String>() {
-
-        private static final long serialVersionUID = 3348458944893841L;
-
-        {
-            put("R", "*");
-            put("X", "**");
-        }
-    };
+    private AllRingsFinder arf;
 
     /**
      * Creates a fingerprint generator of length <code>DEFAULT_SIZE</code>
@@ -131,20 +120,21 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
 
     /**
      * Constructs a fingerprint generator that creates fingerprints of
-     * the given size, using a generation algorithm with the given search
+     * the given fingerprintLength, using a generation algorithm with the given search
      * depth.
      *
-     * @param  size        The desired size of the fingerprint
+     * @param  fingerprintLength        The desired fingerprintLength of the fingerprint
      * @param  searchDepth The desired depth of search
      */
-    public Fingerprinter(int size, int searchDepth) {
-        this.size = size;
+    public Fingerprinter(int fingerprintLength, int searchDepth) {
+        this.fingerprintLength = fingerprintLength;
         this.searchDepth = searchDepth;
         this.respectRingMatches = false;
+        this.arf = new AllRingsFinder();
     }
 
     /**
-     * Generates a fingerprint of the default size for the given AtomContainer.
+     * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
      *
      * @param container The AtomContainer for which a Fingerprint is generated
      * @param ringFinder An instance of 
@@ -158,8 +148,9 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
     public BitSet getFingerprint(IAtomContainer container,
             AllRingsFinder ringFinder)
             throws CDKException {
-
-        int position = -1;
+        if (ringFinder != null) {
+            this.arf = ringFinder;
+        }
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
@@ -169,11 +160,11 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
         logger.debug("time for aromaticity calculation: "
                 + (after - before) + " milliseconds");
         logger.debug("Finished Aromaticity Detection");
-        BitSet bitSet = new BitSet(size);
+        BitSet bitSet = new BitSet(fingerprintLength);
 
-        hashes = findPaths(container, searchDepth);
-        for (int hash : hashes) {
-            position = (int) generateMersenneTwisterRandomNumber(size, hash);
+        Integer[] hashes = findPaths(container, searchDepth);
+        for (Integer hash : hashes) {
+            int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
             bitSet.set(position);
         }
 
@@ -181,7 +172,7 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
     }
 
     /**
-     * Generates a fingerprint of the default size for the given AtomContainer.
+     * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
      *
      *@param container The AtomContainer for which a Fingerprint is generated
      * @return
@@ -202,8 +193,10 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
-        for (int hash : hashes) {
-            int position = (int) generateMersenneTwisterRandomNumber(size, hash);
+
+        Integer[] hashes = findPaths(atomContainer, searchDepth);
+        for (Integer hash : hashes) {
+            int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
             uniquePaths.put(new Integer(position).toString(), hash);
         }
         return uniquePaths;
@@ -219,136 +212,45 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
      * @param searchDepth The maximum path length desired
      * @return A map of path strings, keyed on themselves
      */
-    protected int[] findPaths(IAtomContainer container, int searchDepth) {
+    protected Integer[] findPaths(IAtomContainer container, int searchDepth) {
 
-        List<String> pseudoAtoms = new ArrayList<String>();
-        int pseduoAtomCounter = 0;
-
-        List<StringBuffer> allPaths = new ArrayList<StringBuffer>();
-
-        Map<IAtom, Map<IAtom, IBond>> cache = new HashMap<IAtom, Map<IAtom, IBond>>();
-        for (IAtom sourceAtom : container.atoms()) {
-            List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(container, sourceAtom, DEFAULT_SEARCH_DEPTH);
-            for (List<IAtom> path : pathsOfLengthUpto) {
-                StringBuffer sb = new StringBuffer();
-                IAtom x = path.get(0);
-
-                if (x instanceof IPseudoAtom) {
-                    if (!pseudoAtoms.contains(x.getSymbol())) {
-                        pseudoAtoms.add(pseduoAtomCounter++, x.getSymbol());
-                    }
-                    sb.append((char) (PeriodicTable.getElementCount()
-                            + pseudoAtoms.indexOf(x.getSymbol()) + 1));
-                } else {
-                    Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
-                    if (atnum != null) {
-                        sb.append(toAtomPattern(x));
-                    } else {
-                        sb.append((char) PeriodicTable.getElementCount() + 1);
-                    }
-                }
-
-                for (int i = 1; i < path.size(); i++) {
-                    final IAtom[] y = {path.get(i)};
-                    Map<IAtom, IBond> m = cache.get(x);
-                    final IBond[] b = {m != null ? m.get(y[0]) : null};
-                    if (b[0] == null) {
-                        b[0] = container.getBond(x, y[0]);
-                        cache.put(x,
-                                new HashMap<IAtom, IBond>() {
-
-                                    {
-                                        put(y[0], b[0]);
-                                    }
-                                    private static final long serialVersionUID = 0xb3a7a32449fL;
-                                });
-                    }
-                    sb.append(getBondSymbol(b[0]));
-                    sb.append(toAtomPattern(y[0]));
-                    x = y[0];
-                }
-
-                // we store the lexicographically lower one of the
-                // string and its reverse
-                StringBuffer revForm = new StringBuffer(sb);
-                revForm.reverse();
-                if (sb.toString().compareTo(revForm.toString()) <= 0) {
-                    allPaths.add(sb);
-                } else {
-                    allPaths.add(revForm);
-                }
-            }
-        }
-
-        pseudoAtoms.clear();
-
-        // now lets clean stuff up
-        Set<String> cleanPath = new HashSet<String>();
-        for (StringBuffer s : allPaths) {
-            String s1 = s.toString().trim();
-            if (s1.equals("")) {
-                continue;
-            }
-            if (cleanPath.contains(s1)) {
-                continue;
-            }
-            String s2 = s.reverse().toString().trim();
-            if (cleanPath.contains(s2)) {
-                continue;
-            }
-            cleanPath.add(s2);
-        }
-
+        IWalker walker = new MoleculeWalker(searchDepth, container);
         // convert paths to hashes
-        int[] hashes = new int[cleanPath.size()];
-        int i = 0;
-        for (String s : cleanPath) {
-            hashes[i++] = new HashCodeBuilder(17, 37).append(s).toHashCode();
+        List<Integer> paths = new ArrayList<Integer>();
+        int patternIndex = 0;
+        for (String s : walker.getPaths()) {
+            int toHashCode = new HashCodeBuilder(17, 37).append(s).toHashCode();
+            paths.add(patternIndex++, toHashCode);
         }
-        return hashes;
-    }
 
-    private String toAtomPattern(IAtom atom) {
-        Double charge = atom.getCharge() == null ? 0. : atom.getCharge();
-        Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
-        Integer atomNum = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
-        int isRingAtom = 0;
         if (isRespectRingMatches()) {
-            isRingAtom = atom.getFlag(CDKConstants.ISINRING) ? 1 : 0;
+            IRingSet rings = new RingSet();
+            IRingSet allRings;
+            try {
+                allRings = arf.findAllRings(container);
+                rings.add(allRings);
+            } catch (CDKException e) {
+                logger.debug(e.toString());
+            }
+
+            // sets SSSR information
+            SSSRFinder finder = new SSSRFinder(container);
+            IRingSet sssr = finder.findEssentialRings();
+            rings.add(sssr);
+            RingSetManipulator.markAromaticRings(rings);
+            RingSetManipulator.sort(rings);
+            int ringSize = 0;
+            for (IAtomContainer ring : rings.atomContainers()) {
+                int atomCount = ring.getAtomCount();
+                if (ringSize < atomCount) {
+                    int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
+                    paths.add(patternIndex++, toHashCode);
+                    ringSize++;
+                }
+            }
         }
 
-        String atomConfiguration = atom.getSymbol()
-                + ":" + charge.toString()
-                + ":" + stereoParity.toString()
-                + ":" + atomNum
-                + ":" + isRingAtom;
-
-        if (!patterns.containsKey(atomConfiguration)) {
-            String generatedPattern = generateNewPattern();
-            patterns.put(atomConfiguration, generatedPattern);
-        }
-        return patterns.get(atomConfiguration);
-    }
-
-    /**
-     *  Gets the bondSymbol attribute of the Fingerprinter class
-     *
-     *@param  bond  Description of the Parameter
-     *@return       The bondSymbol value
-     */
-    protected String getBondSymbol(IBond bond) {
-        String bondSymbol = "";
-        if (bond.getFlag(CDKConstants.ISAROMATIC)) {
-            bondSymbol += "@";
-        } else if (bond.getOrder() == IBond.Order.SINGLE) {
-            bondSymbol += "-";
-        } else if (bond.getOrder() == IBond.Order.DOUBLE) {
-            bondSymbol += "=";
-        } else if (bond.getOrder() == IBond.Order.TRIPLE) {
-            bondSymbol += "#";
-        }
-
-        return bondSymbol;
+        return paths.toArray(new Integer[paths.size()]);
     }
 
     /**
@@ -364,16 +266,7 @@ public class Fingerprinter extends RandomNumber implements IFingerprinter {
     @TestMethod("testGetSize")
     @Override
     public int getSize() {
-        return size;
-    }
-
-    private String generateNewPattern() {
-        int patternSize = patterns.size() + 1;
-        StringBuilder st = new StringBuilder(patternSize);
-        for (int i = 0; i < patternSize; i++) {
-            st.append('*');
-        }
-        return st.toString();
+        return fingerprintLength;
     }
 
     /**

@@ -24,15 +24,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package fingerprints2;
+package fingerprints;
 
-import fingerprints2.interfaces.IFingerprinter;
-import fingerprints2.interfaces.IWalker;
+import fingerprints.helper.BloomFilter;
+import fingerprints.helper.MoleculeWalker;
+import fingerprints.helper.RandomNumber;
+import fingerprints.interfaces.IFingerprinter;
+import fingerprints.interfaces.IWalker;
 import java.util.BitSet;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.openscience.cdk.RingSet;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
@@ -88,7 +90,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     public HashedFingerprinter(int fingerPrintSize, int searchDepth) {
         this.searchDepth = searchDepth;
         this.respectRingMatches = false;
-        this.ringBitCount = 20;
+        this.ringBitCount = 10;
         this.arf = new AllRingsFinder();
         setFingerprintLength(fingerPrintSize);
     }
@@ -228,11 +230,11 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         BitSet result = new BitSet(getFingerprintLength());
         result.or(walkBits);
         if (isRespectRingMatches()) {
-            Set<IAtomContainer> rings = new HashSet<IAtomContainer>();
+            IRingSet rings = new RingSet();
             IRingSet allRings;
             try {
                 allRings = arf.findAllRings(container);
-                rings.addAll(RingSetManipulator.getAllAtomContainers(allRings));
+                rings.add(allRings);
             } catch (CDKException e) {
                 logger.debug(e.toString());
             }
@@ -240,22 +242,28 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
             // sets SSSR information
             SSSRFinder finder = new SSSRFinder(container);
             IRingSet sssr = finder.findEssentialRings();
-            rings.addAll(RingSetManipulator.getAllAtomContainers(sssr));
+            rings.add(sssr);
+            RingSetManipulator.markAromaticRings(rings);
+            RingSetManipulator.sort(rings);
             setRingBits(result, rings);
         }
         bloomFilter.clear();
         return result;
     }
 
-    private void setRingBits(BitSet bitset, Set<IAtomContainer> rings) {
-        for (IAtomContainer ring : rings) {
-            if (ring.getAtomCount() < ringBitCount) {
-                int atomCount = ring.getAtomCount();
-                int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
-                int ringPosition = (int) generateMersenneTwisterRandomNumber(ringBitCount, toHashCode);
-                int index = bloomFilter.getBitArraySize() + (ringPosition - 2);
-                if (index < getFingerprintLength()) {
-                    bitset.set(index);
+    private void setRingBits(BitSet bitset, IRingSet rings) {
+        int ringSize = 0;
+        for (IAtomContainer ring : rings.atomContainers()) {
+            int atomCount = ring.getAtomCount();
+            if (atomCount < ringBitCount) {
+                if (ringSize < atomCount) {
+                    int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
+                    int ringPosition = (int) generateMersenneTwisterRandomNumber(ringBitCount, toHashCode);
+                    int index = bloomFilter.getBitArraySize() + (ringPosition - 2);
+                    if (index < getFingerprintLength()) {
+                        bitset.set(index);
+                    }
+                    ringSize++;
                 }
             }
         }

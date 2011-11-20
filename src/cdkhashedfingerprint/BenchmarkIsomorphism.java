@@ -25,7 +25,7 @@
  */
 package cdkhashedfingerprint;
 
-import helper.Data;
+import cdkhashedfingerprint.helper.Data;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

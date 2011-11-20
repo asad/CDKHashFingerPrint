@@ -23,36 +23,49 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package fingerprints2;
+package cdkhashedfingerprint.helper;
 
-import org.apache.commons.math.random.MersenneTwister;
-import org.apache.commons.math.random.RandomAdaptor;
-import org.apache.commons.math.random.RandomGenerator;
+import java.util.BitSet;
+import org.openscience.cdk.interfaces.IAtomContainer;
 
 /**
- * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
+ *
+ * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
-public class RandomNumber {
+public class Data {
+
+    private BitSet fingerprint;
+    private final IAtomContainer atomContainer;
 
     /**
-     * Mersenne Twister Random Number 
-     * for a hashcode within a range between 0 to maximum 
-     * @param maximum
-     * @param hashCode
-     * @return
+     * Store the fingerprint and its structure
+     * @param fingerprint
+     * @param atomContainer
      */
-    public static long generateMersenneTwisterRandomNumber(int maximum, long hashCode) {
-        RandomGenerator rg = new RandomAdaptor(new MersenneTwister(hashCode));
-        return rg.nextInt(maximum);
+    public Data(BitSet fingerprint, IAtomContainer atomContainer) {
+        this.fingerprint = fingerprint;
+        this.atomContainer = atomContainer;
     }
 
     /**
-     * Mersenne Twister Random Number
-     * @param maximum
-     * @return
+     * Store the fingerprint and its structure
+     * @param atomContainer
      */
-    public static long generateMersenneTwisterRandomNumber(int maximum) {
-        RandomGenerator rg = new RandomAdaptor(new MersenneTwister());
-        return rg.nextInt(maximum);
+    public Data(IAtomContainer atomContainer) {
+        this.atomContainer = atomContainer;
+    }
+
+    /**
+     * @return the fingerprint
+     */
+    public BitSet getFingerprint() {
+        return fingerprint;
+    }
+
+    /**
+     * @return the atomContainer
+     */
+    public IAtomContainer getAtomContainer() {
+        return atomContainer;
     }
 }

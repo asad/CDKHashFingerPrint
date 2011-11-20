@@ -23,34 +23,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package fingerprints2.interfaces;
+package fingerprints.helper;
 
-import java.util.Set;
+import org.apache.commons.math.random.MersenneTwister;
+import org.apache.commons.math.random.RandomAdaptor;
+import org.apache.commons.math.random.RandomGenerator;
 
 /**
- *
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
  */
-public interface IWalker {
+public class RandomNumber {
 
     /**
-     * @return the maximumDepth
+     * Mersenne Twister Random Number 
+     * for a hashcode within a range between 0 to maximum 
+     * @param maximum
+     * @param hashCode
+     * @return
      */
-    int getMaximumDepth();
+    public static long generateMersenneTwisterRandomNumber(int maximum, long hashCode) {
+        RandomGenerator rg = new RandomAdaptor(new MersenneTwister(hashCode));
+        return rg.nextInt(maximum);
+    }
 
     /**
-     * @return the cleanPath
+     * Mersenne Twister Random Number
+     * @param maximum
+     * @return
      */
-    int getPathCount();
-
-    /**
-     * @return the cleanPath
-     */
-    Set<String> getPaths();
-
-    /**
-     * @param maximumDepth
-     */
-    void setMaximumDepth(int maximumDepth);
-    
+    public static long generateMersenneTwisterRandomNumber(int maximum) {
+        RandomGenerator rg = new RandomAdaptor(new MersenneTwister());
+        return rg.nextInt(maximum);
+    }
 }

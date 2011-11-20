@@ -23,49 +23,56 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package helper;
+
+package fingerprints.helper;
 
 import java.util.BitSet;
-import org.openscience.cdk.interfaces.IAtomContainer;
+import java.util.Iterator;
 
 /**
  *
- * @author Syed Asad Rahman <asad@ebi.ac.uk>
+ * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
  */
-public class Data {
 
-    private BitSet fingerprint;
-    private final IAtomContainer atomContainer;
+public class BitSetIterable implements Iterable<Object> {
 
-    /**
-     * Store the fingerprint and its structure
-     * @param fingerprint
-     * @param atomContainer
-     */
-    public Data(BitSet fingerprint, IAtomContainer atomContainer) {
-        this.fingerprint = fingerprint;
-        this.atomContainer = atomContainer;
+    private class BitSetIterator implements Iterator<Object> {
+
+        private int index;
+
+        public BitSetIterator(int i) {
+            index = bitSet.nextSetBit(i);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index >= 0;
+        }
+
+        @Override
+        public Integer next() {
+            int tmpIndex = index;
+            index = bitSet.nextSetBit(index + 1);
+            return tmpIndex;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 
-    /**
-     * Store the fingerprint and its structure
-     * @param atomContainer
-     */
-    public Data(IAtomContainer atomContainer) {
-        this.atomContainer = atomContainer;
+    public static BitSetIterable iterate(BitSet bitSet) {
+        return new BitSetIterable(bitSet);
+    }
+    private final BitSet bitSet;
+
+    public BitSetIterable(BitSet bitSet) {
+        this.bitSet = bitSet;
     }
 
-    /**
-     * @return the fingerprint
-     */
-    public BitSet getFingerprint() {
-        return fingerprint;
-    }
-
-    /**
-     * @return the atomContainer
-     */
-    public IAtomContainer getAtomContainer() {
-        return atomContainer;
+    @Override
+    public Iterator<Object> iterator() {
+        return new BitSetIterator(0);
     }
 }

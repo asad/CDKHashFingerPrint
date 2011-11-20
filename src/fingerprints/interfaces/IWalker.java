@@ -23,56 +23,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+package fingerprints.interfaces;
 
-package fingerprints2;
-
-import java.util.BitSet;
-import java.util.Iterator;
+import java.util.Set;
 
 /**
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
  */
+public interface IWalker {
 
-public class BitSetIterable implements Iterable<Object> {
+    /**
+     * @return the maximumDepth
+     */
+    int getMaximumDepth();
 
-    private class BitSetIterator implements Iterator<Object> {
+    /**
+     * @return the cleanPath
+     */
+    int getPathCount();
 
-        private int index;
+    /**
+     * @return the cleanPath
+     */
+    Set<String> getPaths();
 
-        public BitSetIterator(int i) {
-            index = bitSet.nextSetBit(i);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return index >= 0;
-        }
-
-        @Override
-        public Integer next() {
-            int tmpIndex = index;
-            index = bitSet.nextSetBit(index + 1);
-            return tmpIndex;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    public static BitSetIterable iterate(BitSet bitSet) {
-        return new BitSetIterable(bitSet);
-    }
-    private final BitSet bitSet;
-
-    public BitSetIterable(BitSet bitSet) {
-        this.bitSet = bitSet;
-    }
-
-    @Override
-    public Iterator<Object> iterator() {
-        return new BitSetIterator(0);
-    }
+    /**
+     * @param maximumDepth
+     */
+    void setMaximumDepth(int maximumDepth);
+    
 }

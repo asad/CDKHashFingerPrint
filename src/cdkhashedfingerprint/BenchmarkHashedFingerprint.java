@@ -25,8 +25,8 @@
  */
 package cdkhashedfingerprint;
 
-import fingerprints2.HashedFingerprinter;
-import helper.Data;
+import fingerprints.HashedFingerprinter;
+import cdkhashedfingerprint.helper.Data;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,8 +59,8 @@ public class BenchmarkHashedFingerprint extends Base {
     private static long HITS;
     private static Map<String, Data> dataMap = new HashMap<String, Data>();
     private static IFingerprinter cdkFingerprint = new org.openscience.cdk.fingerprint.Fingerprinter(1024);
-    private static fingerprints2.interfaces.IFingerprinter fingerprint = new fingerprints.Fingerprinter(1024);
-    private static fingerprints2.interfaces.IFingerprinter fingerprint2 = new HashedFingerprinter(1024);
+    private static fingerprints.interfaces.IFingerprinter fingerprint = new fingerprints.Fingerprinter(1024);
+    private static fingerprints.interfaces.IFingerprinter fingerprint2 = new HashedFingerprinter(1024);
 
     /**
      * @param args the command line arguments
