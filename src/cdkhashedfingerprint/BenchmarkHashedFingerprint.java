@@ -25,6 +25,7 @@
  */
 package cdkhashedfingerprint;
 
+import fingerprints2.HashedFingerprinter;
 import helper.Data;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,7 +59,8 @@ public class BenchmarkHashedFingerprint extends Base {
     private static long HITS;
     private static Map<String, Data> dataMap = new HashMap<String, Data>();
     private static IFingerprinter cdkFingerprint = new org.openscience.cdk.fingerprint.Fingerprinter(1024);
-    private static fingerprints.IFingerprinter fingerprint = new fingerprints.Fingerprinter(1024);
+    private static fingerprints2.interfaces.IFingerprinter fingerprint = new fingerprints.Fingerprinter(1024);
+    private static fingerprints2.interfaces.IFingerprinter fingerprint2 = new HashedFingerprinter(1024);
 
     /**
      * @param args the command line arguments
@@ -111,9 +113,11 @@ public class BenchmarkHashedFingerprint extends Base {
                     if (args.length > 1 && args[1].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac);
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    }
-                    if (args.length > 1 && args[1].equals("new")) {
-                        hashedFingerPrint = getNewFingerprint(args, ac);
+                    } else if (args.length > 1 && args[1].equals("new")) {
+                        hashedFingerPrint = getNewFingerprint(ac);
+                        dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
+                    } else if (args.length > 1 && args[1].equals("hash")) {
+                        hashedFingerPrint = getHashedFingerprint(ac);
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
                 } catch (Exception e) {
@@ -188,7 +192,11 @@ public class BenchmarkHashedFingerprint extends Base {
         return cdkFingerprint.getFingerprint(ac);
     }
 
-    private static BitSet getNewFingerprint(String[] args, IAtomContainer ac) throws CDKException {
+    private static BitSet getNewFingerprint(IAtomContainer ac) throws CDKException {
         return fingerprint.getFingerprint(ac);
+    }
+
+    private static BitSet getHashedFingerprint(IAtomContainer ac) throws CDKException {
+        return fingerprint2.getFingerprint(ac);
     }
 }

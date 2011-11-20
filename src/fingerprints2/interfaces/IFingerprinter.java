@@ -23,7 +23,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package fingerprints;
+package fingerprints2.interfaces;
 
 import java.util.BitSet;
 import java.util.Map;
@@ -31,7 +31,6 @@ import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
-
 
 /**
  * @author         Syed Asad Rahman (2011)

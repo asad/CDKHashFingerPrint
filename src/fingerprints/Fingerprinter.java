@@ -26,6 +26,7 @@
  */
 package fingerprints;
 
+import fingerprints2.interfaces.IFingerprinter;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
