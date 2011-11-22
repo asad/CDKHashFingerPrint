@@ -7,11 +7,11 @@ Command line interface
 
 /*  Test improved CDK FP */
 
-java -jar dist/CDKHashedFingerprint.jar test/data/mol hash  2  2000
+java -jar BenchmarkHashedFingerprinter.jar test/data/mol hash  2  2000
  
 /* Test CDK default FP */
  
-java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk  2  2000
+java -jar BenchmarkHashedFingerprinter.jar test/data/mol cdk  2  2000
    
 ***************************************
 Improved CDK HashedFingerprinter class with 1024 size FP
@@ -58,7 +58,7 @@ and ~30-40% lesser false positives (FPs) than the original version!
 
 /* Test new FP with ring matcher */
 
-java -jar dist/CDKHashedFingerprint.jar test/data/mol hash  1  2000
+java -jar BenchmarkHashedFingerprinter.jar test/data/mol hash  1  2000
 
 ------------------------------------------------------------------------------
 CASES:		TP:	FP:	TN:	FN:	ACCURACY:   TPR:    FPR:	Time (mins): 
@@ -75,5 +75,5 @@ and ~40% lesser false positives (FPs) than the original version!
 
 /* Test new FP with bloom filter and ring matcher */
 
-java -jar dist/CDKHashedFingerprint.jar test/data/mol hashbloom  1  2000
+java -jar BenchmarkHashedFingerprinter.jar test/data/mol hashbloom  1  2000
 
