@@ -45,7 +45,6 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.ringsearch.SSSRFinder;
-import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -156,7 +155,6 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-        CDKHydrogenAdder.getInstance(container.getBuilder()).addImplicitHydrogens(container);
         CDKHueckelAromaticityDetector.detectAromaticity(container);
         long after = System.currentTimeMillis();
         logger.debug("time for aromaticity calculation: "
