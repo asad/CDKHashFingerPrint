@@ -192,14 +192,12 @@ public class MoleculeWalker implements IWalker, Serializable {
     }
 
     private String toAtomPattern(IAtom atom) {
-        Integer charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
         Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
-        Integer atomNum = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
+        Integer atomicNumber = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
         
         String atomConfiguration = atom.getSymbol()
-                + ":" + charge.toString()
                 + ":" + stereoParity.toString()
-                + ":" + atomNum;
+                + ":" + atomicNumber;
 
         if (!patterns.containsKey(atomConfiguration)) {
             String generatedPattern = generateNewPattern();

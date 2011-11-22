@@ -41,6 +41,7 @@ import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
@@ -100,6 +101,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
 
     private int fingerprintLength;
     private boolean respectRingMatches;
+    private boolean respectFormalCharges;
     private int searchDepth;
     static int debugCounter = 0;
     private static ILoggingTool logger =
@@ -130,6 +132,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         this.fingerprintLength = fingerprintLength;
         this.searchDepth = searchDepth;
         this.respectRingMatches = false;
+        this.respectFormalCharges = false;
         this.arf = new AllRingsFinder();
     }
 
@@ -250,6 +253,17 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
             }
         }
 
+        if (isRespectFormalCharges()) {
+            for (IAtom atom : container.atoms()) {
+                int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
+                if (charge != 0) {
+                    String formalChargePattern = String.valueOf(charge);
+                    int toHashCode = new HashCodeBuilder(17, 37).append(formalChargePattern).toHashCode();
+                    paths.add(patternIndex++, toHashCode);
+                }
+            }
+        }
+
         return paths.toArray(new Integer[paths.size()]);
     }
 
@@ -287,5 +301,19 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     @Override
     public void setRespectRingMatches(boolean respectRingMatches) {
         this.respectRingMatches = respectRingMatches;
+    }
+
+    /**
+     * @return the respectFormalCharges
+     */
+    public boolean isRespectFormalCharges() {
+        return respectFormalCharges;
+    }
+
+    /**
+     * @param respectFormalCharges the flag to set if formal charge is checked
+     */
+    public void setRespectFormalCharges(boolean respectFormalCharges) {
+        this.respectFormalCharges = respectFormalCharges;
     }
 }

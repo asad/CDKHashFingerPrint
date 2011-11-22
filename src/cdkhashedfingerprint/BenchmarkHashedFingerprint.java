@@ -100,7 +100,7 @@ public class BenchmarkHashedFingerprint extends Base {
             fingerprint1.setRespectRingMatches(true);
             fingerprint2.setRespectRingMatches(true);
         }
-
+        
         for (int k = 0; k < molecules.size(); k += interval) {
             int counter = 1;
             for (String inchiKey : molecules.keySet()) {
