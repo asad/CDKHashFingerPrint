@@ -61,7 +61,7 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
  *  structures. <p>
  *
  *  A fingerprint is generated for an AtomContainer with this code: <pre>
- *   Molecule molecule = new Molecule();
+ *   AtomContainer molecule = new AtomContainer();
  *   IFingerprinter fingerprinter = new HashedFingerprinter();
  *   BitSet fingerprint = fingerprinter.getFingerprint(molecule);
  *   This will match ring system with rings.

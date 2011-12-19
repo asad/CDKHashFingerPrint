@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.jniinchi.INCHI_RET;
 import org.openscience.cdk.CDKConstants;
-import org.openscience.cdk.Molecule;
+import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGenerator;
@@ -92,7 +92,7 @@ public class Base {
             for (File fileIndex : listFiles) {
                 if (fileIndex.isFile() && fileIndex.getName().contains(".mol")) {
                     MDLV2000Reader reader = new MDLV2000Reader(new FileReader(fileIndex));
-                    IAtomContainer ac = (IAtomContainer) reader.read(new Molecule());
+                    IAtomContainer ac = (IAtomContainer) reader.read(new AtomContainer());
                     try {
                         initializeMolecule(ac);
                         ac.setID((fileIndex.getName().split(".mol"))[0]);
