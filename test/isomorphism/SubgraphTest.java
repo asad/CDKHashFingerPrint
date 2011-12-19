@@ -9,7 +9,7 @@ import java.util.BitSet;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
-import org.openscience.cdk.Molecule;
+import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -66,8 +66,8 @@ public class SubgraphTest {
         FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00196.mol");
         MDLV2000Reader readerQ = new MDLV2000Reader(smilesQ);
         MDLV2000Reader readerT = new MDLV2000Reader(smilesT);
-        IAtomContainer moleculeQ = (IAtomContainer) readerQ.read(new Molecule());
-        IAtomContainer moleculeT = (IAtomContainer) readerT.read(new Molecule());
+        IAtomContainer moleculeQ = (IAtomContainer) readerQ.read(new AtomContainer());
+        IAtomContainer moleculeT = (IAtomContainer) readerT.read(new AtomContainer());
         moleculeQ.setID("C00107");
         moleculeT.setID("C00196");
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
@@ -84,6 +84,6 @@ public class SubgraphTest {
         System.out.println("isSubset: " + vf2);
 
         Assert.assertFalse(vf2);
-        Assert.assertTrue(uit);
+        Assert.assertFalse(uit);
     }
 }
