@@ -212,7 +212,7 @@ public class HashedFingerprinterTest {
         System.out.println("Atom count " + molecule.getAtomCount());
         HashedFingerprinter fingerprint = new HashedFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectHybridization(true);
+        fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
         System.out.println("fp " + fingerprint1.toString());
@@ -227,7 +227,7 @@ public class HashedFingerprinterTest {
         System.out.println("Atom count " + molecule.getAtomCount());
         HashedFingerprinter fingerprint = new HashedFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectHybridization(true);
+        fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
         System.out.println("fp " + fingerprint1.toString());
@@ -243,7 +243,7 @@ public class HashedFingerprinterTest {
         System.out.println("Atom count " + molecule.getAtomCount());
         HashedFingerprinter fingerprint = new HashedFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectHybridization(true);
+        fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
         System.out.println("fp " + fingerprint1.toString());
