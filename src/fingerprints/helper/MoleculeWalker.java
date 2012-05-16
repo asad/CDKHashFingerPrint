@@ -60,21 +60,33 @@ public class MoleculeWalker implements IWalker, Serializable {
             put("X", "**");
         }
     };
+    private final boolean hybridization;
 
     /**
-     * 
+     *
      * @param maximumDepth
      * @param atomContainer
+     * @param hybridization
      */
-    public MoleculeWalker(int maximumDepth, IAtomContainer atomContainer) {
+    public MoleculeWalker(int maximumDepth, IAtomContainer atomContainer, boolean hybridization) {
         this.cleanPath = new HashSet<String>();
         this.atomContainer = atomContainer;
         this.maximumDepth = maximumDepth;
+        this.hybridization = hybridization;
         findPaths();
     }
 
     /**
-     * 
+     *
+     * @param maximumDepth
+     * @param atomContainer
+     */
+    public MoleculeWalker(int maximumDepth, IAtomContainer atomContainer) {
+        this(maximumDepth, atomContainer, false);
+    }
+
+    /**
+     *
      * @param atomContainer
      */
     public MoleculeWalker(IAtomContainer atomContainer) {
@@ -90,7 +102,7 @@ public class MoleculeWalker implements IWalker, Serializable {
     }
 
     /**
-     * @param maximumDepth 
+     * @param maximumDepth
      */
     @Override
     public void setMaximumDepth(int maximumDepth) {
@@ -128,7 +140,8 @@ public class MoleculeWalker implements IWalker, Serializable {
 
                 if (x instanceof IPseudoAtom) {
                     if (!pseudoAtoms.contains(x.getSymbol())) {
-                        pseudoAtoms.add(pseduoAtomCounter++, x.getSymbol());
+                        pseudoAtoms.add(pseduoAtomCounter, x.getSymbol());
+                        pseduoAtomCounter += 1;
                     }
                     sb.append((char) (PeriodicTable.getElementCount()
                             + pseudoAtoms.indexOf(x.getSymbol()) + 1));
@@ -194,10 +207,19 @@ public class MoleculeWalker implements IWalker, Serializable {
     private String toAtomPattern(IAtom atom) {
         Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
         Integer atomicNumber = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
-        
-        String atomConfiguration = atom.getSymbol()
-                + ":" + stereoParity.toString()
-                + ":" + atomicNumber;
+        String atomConfiguration;
+        if (hybridization) {
+            String hydb = atom.getHybridization() != null ? atom.getHybridization().toString() : String.valueOf(atomContainer.getConnectedAtomsCount(atom));
+            atomConfiguration = atom.getSymbol()
+                    + ":" + hydb
+                    + ":" + stereoParity.toString()
+                    + ":" + atomicNumber
+                    + ":" + atom.getFlag(CDKConstants.ISINRING);
+        } else {
+            atomConfiguration = atom.getSymbol()
+                    + ":" + stereoParity.toString()
+                    + ":" + atomicNumber;
+        }
 
         if (!patterns.containsKey(atomConfiguration)) {
             String generatedPattern = generateNewPattern();
@@ -207,10 +229,10 @@ public class MoleculeWalker implements IWalker, Serializable {
     }
 
     /**
-     *  Gets the bondSymbol attribute of the HashedFingerprinter class
+     * Gets the bondSymbol attribute of the HashedFingerprinter class
      *
-     *@param  bond  Description of the Parameter
-     *@return       The bondSymbol value
+     * @param bond Description of the Parameter
+     * @return The bondSymbol value
      */
     private String getBondSymbol(IBond bond) {
         String bondSymbol = "";
