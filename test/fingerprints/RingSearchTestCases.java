@@ -19,21 +19,6 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 public class RingSearchTestCases {
 
     @Test
-    public void testGenerateFingerprintAnthracene() throws InvalidSmilesException, Exception {
-
-        String smiles = "C1=CC2=CC3=CC=CC=C3C=C2C=C1";
-        SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-        IAtomContainer molecule = smilesParser.parseSmiles(smiles);
-        System.out.println("Atom count " + molecule.getAtomCount());
-        HashedFingerprinter fingerprint = new HashedFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectHybridization(true);
-        BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
-        System.out.println("fp " + fingerprint1.toString());
-    }
-
-    @Test
     public void testGenerateFingerprintNaphthalene() throws InvalidSmilesException, Exception {
 
         String smiles = "C1=CC2=CC=CC=C2C=C1";
@@ -45,7 +30,22 @@ public class RingSearchTestCases {
         fingerprint.setRespectHybridization(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
-        System.out.println("fp " + fingerprint1.toString());
+        System.out.println("Naphthalene fp " + fingerprint1.toString());
+    }
+
+    @Test
+    public void testGenerateFingerprintAnthracene() throws InvalidSmilesException, Exception {
+
+        String smiles = "C1=CC2=CC3=CC=CC=C3C=C2C=C1";
+        SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+        IAtomContainer molecule = smilesParser.parseSmiles(smiles);
+        System.out.println("Atom count " + molecule.getAtomCount());
+        HashedFingerprinter fingerprint = new HashedFingerprinter(1024);
+        fingerprint.setRespectRingMatches(true);
+        fingerprint.setRespectHybridization(true);
+        BitSet fingerprint1;
+        fingerprint1 = fingerprint.getFingerprint(molecule);
+        System.out.println("Anthracene fp " + fingerprint1.toString());
     }
 
     @Test
@@ -61,6 +61,6 @@ public class RingSearchTestCases {
         fingerprint.setRespectHybridization(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getFingerprint(molecule);
-        System.out.println("fp " + fingerprint1.toString());
+        System.out.println(" Multiphtalene fp " + fingerprint1.toString());
     }
 }
