@@ -60,21 +60,6 @@ public class MoleculeWalker implements IWalker, Serializable {
             put("X", "**");
         }
     };
-    private final boolean hybridization;
-
-    /**
-     *
-     * @param maximumDepth
-     * @param atomContainer
-     * @param hybridization
-     */
-    public MoleculeWalker(int maximumDepth, IAtomContainer atomContainer, boolean hybridization) {
-        this.cleanPath = new HashSet<String>();
-        this.atomContainer = atomContainer;
-        this.maximumDepth = maximumDepth;
-        this.hybridization = hybridization;
-        findPaths();
-    }
 
     /**
      *
@@ -82,7 +67,10 @@ public class MoleculeWalker implements IWalker, Serializable {
      * @param atomContainer
      */
     public MoleculeWalker(int maximumDepth, IAtomContainer atomContainer) {
-        this(maximumDepth, atomContainer, false);
+        this.cleanPath = new HashSet<String>();
+        this.atomContainer = atomContainer;
+        this.maximumDepth = maximumDepth;
+        findPaths();
     }
 
     /**
@@ -208,18 +196,15 @@ public class MoleculeWalker implements IWalker, Serializable {
         Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
         Integer atomicNumber = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
         String atomConfiguration;
-        if (hybridization) {
-            String hydb = atom.getHybridization() != null ? atom.getHybridization().toString() : String.valueOf(atomContainer.getConnectedAtomsCount(atom));
-            atomConfiguration = atom.getSymbol()
-                    + ":" + hydb
-                    + ":" + stereoParity.toString()
-                    + ":" + atomicNumber
-                    + ":" + atom.getFlag(CDKConstants.ISINRING);
-        } else {
-            atomConfiguration = atom.getSymbol()
-                    + ":" + stereoParity.toString()
-                    + ":" + atomicNumber;
-        }
+        String hydb = atom.getHybridization() != null
+                ? atom.getHybridization().toString()
+                : String.valueOf(atomContainer.getConnectedAtomsCount(atom));
+
+        atomConfiguration = atom.getSymbol()
+                + ":" + hydb
+                + ":" + stereoParity.toString()
+                + ":" + atomicNumber
+                + ":" + atom.getFlag(CDKConstants.ISINRING);
 
         if (!patterns.containsKey(atomConfiguration)) {
             String generatedPattern = generateNewPattern();

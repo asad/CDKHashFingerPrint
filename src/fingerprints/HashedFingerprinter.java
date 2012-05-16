@@ -308,18 +308,4 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     public void setRespectFormalCharges(boolean respectFormalCharges) {
         this.respectFormalCharges = respectFormalCharges;
     }
-
-    /**
-     * @return the respectFormalCharges
-     */
-    public boolean isRespectHybridization() {
-        return hybridization;
-    }
-
-    /**
-     * @param hybridization the flag to set if hybridization is checked
-     */
-    public void setRespectHybridization(boolean hybridization) {
-        this.hybridization = hybridization;
-    }
 }
