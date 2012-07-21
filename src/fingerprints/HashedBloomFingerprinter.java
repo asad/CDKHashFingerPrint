@@ -1,7 +1,7 @@
 /* $Revision$ $Author$ $Date$
  *
  * Copyright (C) 2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
- *               2011       Syed Asad Rahman <asad@ebi.ac.uk>
+ *               2011-2012  Syed Asad Rahman <asad@ebi.ac.uk>
  *           
  *
  * Contact: cdk-devel@lists.sourceforge.net
@@ -26,11 +26,6 @@
  */
 package fingerprints;
 
-import fingerprints.helper.BloomFilter;
-import fingerprints.helper.MoleculeWalker;
-import fingerprints.helper.RandomNumber;
-import fingerprints.interfaces.IFingerprinter;
-import fingerprints.interfaces.IWalker;
 import java.util.BitSet;
 import java.util.Map;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -47,6 +42,11 @@ import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
+import fingerprints.helper.BloomFilter;
+import fingerprints.helper.MoleculeWalker;
+import fingerprints.helper.RandomNumber;
+import fingerprints.interfaces.IFingerprinter;
+import fingerprints.interfaces.IWalker;
 
 /*
  * 

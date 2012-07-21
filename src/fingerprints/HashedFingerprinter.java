@@ -26,10 +26,6 @@
  */
 package fingerprints;
 
-import fingerprints.helper.MoleculeWalker;
-import fingerprints.helper.RandomNumber;
-import fingerprints.interfaces.IFingerprinter;
-import fingerprints.interfaces.IWalker;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -50,6 +46,10 @@ import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
+import fingerprints.helper.MoleculeWalker;
+import fingerprints.helper.RandomNumber;
+import fingerprints.interfaces.IFingerprinter;
+import fingerprints.interfaces.IWalker;
 
 /**
  * Generates a fingerprint for a given AtomContainer. Fingerprints are one-dimensional bit arrays, where bits are set
@@ -239,7 +239,8 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 int atomCount = ring.getAtomCount();
                 if (ringSize < atomCount) {
                     int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
-                    paths.add(patternIndex++, toHashCode);
+                    paths.add(patternIndex, toHashCode);
+                    patternIndex++;
                     ringSize++;
                 }
             }
@@ -251,7 +252,8 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 if (charge != 0) {
                     String formalChargePattern = String.valueOf(charge);
                     int toHashCode = new HashCodeBuilder(17, 37).append(formalChargePattern).toHashCode();
-                    paths.add(patternIndex++, toHashCode);
+                    paths.add(patternIndex, toHashCode);
+                    patternIndex++;
                 }
             }
         }

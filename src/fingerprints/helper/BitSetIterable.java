@@ -23,7 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 package fingerprints.helper;
 
 import java.util.BitSet;
@@ -33,7 +32,6 @@ import java.util.Iterator;
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
  */
-
 public class BitSetIterable implements Iterable<Object> {
 
     private class BitSetIterator implements Iterator<Object> {

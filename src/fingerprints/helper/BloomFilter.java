@@ -31,16 +31,14 @@ import java.util.Collection;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * A simple Bloom Filter (see http://en.wikipedia.org/wiki/Bloom_filter) 
- * 
- * Inspired by the SimpleBloomFilter-class written by Ian Clarke. This
- * implementation provides a more evenly distributed Hash-function by
- * using a proper digest instead of the Java RNG. Many of the changes
- * were proposed in comments in his blog:
- * http://blog.locut.us/2008/01/12/a-decent-stand-alone-java-bloom-filter-implementation/
+ * A simple Bloom Filter (see http://en.wikipedia.org/wiki/Bloom_filter)
  *
- * Copyright (c) Ian Clarke
- * Copyright (c) Syed Asad Rahman <asad@ebi.ac.uk>
+ * Inspired by the SimpleBloomFilter-class written by Ian Clarke. This implementation provides a more evenly distributed
+ * Hash-function by using a proper digest instead of the Java RNG. Many of the changes were proposed in comments in his
+ * blog: http://blog.locut.us/2008/01/12/a-decent-stand-alone-java-bloom-filter-implementation/
+ *
+ * Copyright (c) Ian Clarke Copyright (c) Syed Asad Rahman <asad@ebi.ac.uk>
+ *
  * @param <T> Bloom filter data/object type.
  */
 public class BloomFilter<T> extends RandomNumber implements Serializable {
@@ -50,21 +48,6 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     protected final BitSet bitSet;
     private final int bitSetSize, expectedPatterns;
 
-    /**
-     * Calculates a hash code for this class.
-     * @return hash code representing the contents of an instance of this class.
-     */
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 61 * hash + (this.bitSet != null
-                ? (new HashCodeBuilder(17, 37).append(this.bitSet).toHashCode()) : 0);
-        hash = 61 * hash + this.expectedPatterns;
-        hash = 61 * hash + this.bitSetSize;
-        hash = 61 * hash + this.k;
-        return hash;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -73,13 +56,11 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        @SuppressWarnings("unchecked")
         final BloomFilter<T> other = (BloomFilter<T>) obj;
         if (this.k != other.k) {
             return false;
         }
-        if (this.bitSet != other.bitSet && (this.bitSet == null 
-                || !this.bitSet.equals(other.bitSet))) {
+        if (this.bitSet != other.bitSet && (this.bitSet == null || !this.bitSet.equals(other.bitSet))) {
             return false;
         }
         if (this.bitSetSize != other.bitSetSize) {
@@ -91,33 +72,41 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
         return true;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 17 * hash + this.k;
+        hash = 17 * hash + (this.bitSet != null
+                ? (new HashCodeBuilder(17, 37).append(this.bitSet).toHashCode()) : 0);
+        hash = 17 * hash + this.bitSetSize;
+        hash = 17 * hash + this.expectedPatterns;
+        return hash;
+    }
+
     /**
-     * Simplified constructor that sets the number of expected elements equal to
-     * the number of bits.
-     * 
-     * @param bitArraySize
-     *            The number of bits in the bit array (often called 'm' in the
-     *            context of bloom filters).
+     * Calculates a hash code for this class.
+     *
+     * @return hash code representing the contents of an instance of this class.
+     */
+    /**
+     * Simplified constructor that sets the number of expected elements equal to the number of bits.
+     *
+     * @param bitArraySize The number of bits in the bit array (often called 'm' in the context of bloom filters).
      */
     public BloomFilter(int bitArraySize) {
         this(bitArraySize, bitArraySize);
     }
 
     /**
-     * You must specify the number of bits in the
-     * Bloom Filter, and also you should specify the number of items you
-     * expect to add. 
-     * 
-     * The latter is used to choose some optimal internal values to
-     * minimize the false-positive rate (which can be estimated with
-     * expectedFalsePositiveRate()).
-     * 
-     * @param bisetSize
-     *            The number of bits in the bit array (often called 'm' in the
-     *            context of bloom filters).
-     * @param expectedPatterns
-     *            The typical number of items you expect to be added to the
-     *            SimpleBloomFilter (often called 'n').
+     * You must specify the number of bits in the Bloom Filter, and also you should specify the number of items you
+     * expect to add.
+     *
+     * The latter is used to choose some optimal internal values to minimize the false-positive rate (which can be
+     * estimated with expectedFalsePositiveRate()).
+     *
+     * @param bisetSize The number of bits in the bit array (often called 'm' in the context of bloom filters).
+     * @param expectedPatterns The typical number of items you expect to be added to the SimpleBloomFilter (often called
+     * 'n').
      */
     public BloomFilter(int bisetSize, int expectedPatterns) {
         this.bitSetSize = bisetSize;
@@ -129,13 +118,11 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     }
 
     /**
-     * Calculate the probability of a false positive given the specified
-     * number of inserted elements.
-     * 
-     * Calculates the approximate probability of the contains() method returning
-     * true for an object that had not previously been inserted into the bloom
-     * filter. This is known as the "false positive probability".
-     * 
+     * Calculate the probability of a false positive given the specified number of inserted elements.
+     *
+     * Calculates the approximate probability of the contains() method returning true for an object that had not
+     * previously been inserted into the bloom filter. This is known as the "false positive probability".
+     *
      * @return The estimated false positive rate
      */
     public double getExpectedFalsePositiveProbability() {
@@ -144,10 +131,8 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     }
 
     /**
-     * Returns the value chosen for K.<br />
-     * <br />
-     * K is the optimal number of hash functions based on the size
-     * of the Bloom filter and the expected number of inserted elements.
+     * Returns the value chosen for K.<br /> <br /> K is the optimal number of hash functions based on the size of the
+     * Bloom filter and the expected number of inserted elements.
      *
      * @return optimal k.
      */
@@ -165,7 +150,7 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
 
     /*
      * @return This method will always return false
-     * 
+     *
      * @see java.util.Set#add(java.lang.Object)
      */
     public boolean add(T o) {
@@ -178,7 +163,7 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     }
 
     /**
-     * @param c 
+     * @param c
      * @return This method will always return false
      */
     public boolean addAll(Collection<? extends T> c) {
@@ -189,13 +174,12 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     }
 
     /**
-     * Returns true if the element could have been inserted into the Bloom filter.
-     * Use getFalsePositiveProbability() to calculate the probability of this
-     * being correct.
+     * Returns true if the element could have been inserted into the Bloom filter. Use getFalsePositiveProbability() to
+     * calculate the probability of this being correct.
+     *
      * @param o object to check.
-     * @return False indicates that t was definitely not added to this Bloom Filter, 
-     *         true indicates that it probably was.  The probability can be estimated
-     *         using the getExpectedFalsePositiveProbability() method.
+     * @return False indicates that t was definitely not added to this Bloom Filter, true indicates that it probably
+     * was. The probability can be estimated using the getExpectedFalsePositiveProbability() method.
      */
     public boolean contains(Object o) {
         int toHashCode = new HashCodeBuilder(17, 37).append(o).toHashCode();
@@ -209,9 +193,9 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     }
 
     /**
-     * Returns true if all the elements of a Collection could have been inserted
-     * into the Bloom filter. Use getFalsePositiveProbability() to calculate the
-     * probability of this being correct.
+     * Returns true if all the elements of a Collection could have been inserted into the Bloom filter. Use
+     * getFalsePositiveProbability() to calculate the probability of this being correct.
+     *
      * @param c elements to check.
      * @return true if all the elements in c could have been inserted into the Bloom filter.
      */
@@ -246,6 +230,7 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
 
     /**
      * Read a single bit from the Bloom filter.
+     *
      * @param bit the bit to read.
      * @return true if the bit is set, false if it is not.
      */
@@ -255,6 +240,7 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
 
     /**
      * Set a single bit in the Bloom filter.
+     *
      * @param bit is the bit to set.
      * @param value If true, the bit is set. If false, the bit is cleared.
      */
@@ -263,7 +249,7 @@ public class BloomFilter<T> extends RandomNumber implements Serializable {
     }
 
     /**
-     * 
+     *
      * @param other
      * @return
      */

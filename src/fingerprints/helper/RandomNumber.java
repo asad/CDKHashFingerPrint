@@ -25,9 +25,9 @@
  */
 package fingerprints.helper;
 
-import org.apache.commons.math.random.MersenneTwister;
-import org.apache.commons.math.random.RandomAdaptor;
-import org.apache.commons.math.random.RandomGenerator;
+import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.random.RandomAdaptor;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
@@ -35,8 +35,8 @@ import org.apache.commons.math.random.RandomGenerator;
 public class RandomNumber {
 
     /**
-     * Mersenne Twister Random Number 
-     * for a hashcode within a range between 0 to maximum 
+     * Mersenne Twister Random Number for a hashcode within a range between 0 to maximum
+     *
      * @param maximum
      * @param hashCode
      * @return
@@ -48,6 +48,7 @@ public class RandomNumber {
 
     /**
      * Mersenne Twister Random Number
+     *
      * @param maximum
      * @return
      */
