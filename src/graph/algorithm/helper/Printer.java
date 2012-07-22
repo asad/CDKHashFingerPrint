@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package graph.algorithm;
+package graph.algorithm.helper;
 
 import graph.model.AtomVertex;
 import graph.model.ShortestPathContainer;
@@ -13,8 +13,13 @@ import java.util.Stack;
  *
  * @author Asad
  */
-class Printer {
+public class Printer {
 
+    /**
+     * 
+     * @param pathContainer
+     * @param withCosts
+     */
     protected void printShortestPaths(ShortestPathContainer pathContainer, boolean withCosts) {
         for (Map.Entry<AtomVertex, AtomVertex> entry : pathContainer.getAncestors().entrySet()) {
             if (withCosts) {
@@ -26,6 +31,10 @@ class Printer {
         }
     }
 
+    /**
+     * 
+     * @param pathStack
+     */
     protected void printShortestPath(Stack<AtomVertex> pathStack) {
         while (!pathStack.isEmpty()) {
             System.out.println("\t" + pathStack.pop());

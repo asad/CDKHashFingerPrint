@@ -1,5 +1,6 @@
 package graph.algorithm;
 
+import graph.algorithm.helper.Printer;
 import graph.model.AtomContainerGraph;
 import graph.model.AtomVertex;
 import graph.model.ShortestPathContainer;
