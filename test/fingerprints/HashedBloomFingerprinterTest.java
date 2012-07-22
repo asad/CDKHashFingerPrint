@@ -27,25 +27,14 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  */
 public class HashedBloomFingerprinterTest {
 
-    public static void main(String[] args) throws InvalidSmilesException, Exception {
-        testGenerateFingerprint();
-        testGenerateFingerprintIsSubset();
-//        testGenerateFingerprintIsNotASubset1();
-//        testGenerateFingerprintIsNotASubset2();
-//        testGenerateFingerprintIsNotASubset3();
-        testGenerateFingerprintIsNotASubset4();
-    }
-
-    public HashedBloomFingerprinterTest() {
-    }
-
     /**
      * Test of HashedBloomFingerprinter method
+     *
      * @throws InvalidSmilesException
-     * @throws CDKException  
+     * @throws CDKException
      */
     @Test
-    public static void testGenerateFingerprint() throws InvalidSmilesException, CDKException {
+    public void testGenerateFingerprint() throws InvalidSmilesException, CDKException {
 
         String smiles = "CCCCC1C(=O)N(N(C1=O)C1=CC=CC=C1)C1=CC=CC=C1";
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
@@ -59,11 +48,12 @@ public class HashedBloomFingerprinterTest {
 
     /**
      * Test of HashedBloomFingerprinter method
+     *
      * @throws InvalidSmilesException
-     * @throws CDKException  
+     * @throws CDKException
      */
     @Test
-    public static void testGenerateFingerprintIsSubset() throws InvalidSmilesException, CDKException {
+    public void testGenerateFingerprintIsSubset() throws InvalidSmilesException, CDKException {
 
         String smilesT =
                 "NC(=O)C1=C2C=CC(Br)=CC2=C(Cl)C=C1";
@@ -88,12 +78,13 @@ public class HashedBloomFingerprinterTest {
 
     /**
      * Test of HashedBloomFingerprinter method
+     *
      * @throws InvalidSmilesException
      * @throws CDKException
-     * @throws FileNotFoundException  
+     * @throws FileNotFoundException
      */
     @Test
-    public static void testGenerateFingerprintIsNotASubset1() throws InvalidSmilesException, CDKException, FileNotFoundException, FileNotFoundException {
+    public void testGenerateFingerprintIsNotASubset1() throws InvalidSmilesException, CDKException, FileNotFoundException, FileNotFoundException {
 
         String smilesT =
                 "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
@@ -119,11 +110,11 @@ public class HashedBloomFingerprinterTest {
     }
 
     @Test
-    public static void testGenerateFingerprintIsNotASubset2() throws InvalidSmilesException, Exception {
+    public void testGenerateFingerprintIsNotASubset2() throws InvalidSmilesException, Exception {
 
         FileReader smilesQ =
-                new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00137.mol");
-        FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00257.mol");
+                new FileReader("test/data/mol/C00137.mol");
+        FileReader smilesT = new FileReader("test/data/mol/C00257.mol");
         MDLV2000Reader readerQ = new MDLV2000Reader(smilesQ);
         MDLV2000Reader readerT = new MDLV2000Reader(smilesT);
         IAtomContainer moleculeQ = (IAtomContainer) readerQ.read(new AtomContainer());
@@ -147,11 +138,11 @@ public class HashedBloomFingerprinterTest {
     }
 
     @Test
-    public static void testGenerateFingerprintIsNotASubset3() throws InvalidSmilesException, Exception {
+    public void testGenerateFingerprintIsNotASubset3() throws InvalidSmilesException, Exception {
 
         FileReader smilesQ =
-                new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00186.mol");
-        FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00021.mol");
+                new FileReader("test/data/mol/C00186.mol");
+        FileReader smilesT = new FileReader("test/data/mol/C00021.mol");
         MDLV2000Reader readerQ = new MDLV2000Reader(smilesQ);
         MDLV2000Reader readerT = new MDLV2000Reader(smilesT);
         IAtomContainer moleculeQ = (IAtomContainer) readerQ.read(new AtomContainer());
@@ -180,11 +171,11 @@ public class HashedBloomFingerprinterTest {
     }
 
     @Test
-    public static void testGenerateFingerprintIsNotASubset4() throws InvalidSmilesException, Exception {
+    public void testGenerateFingerprintIsNotASubset4() throws InvalidSmilesException, Exception {
 
         FileReader smilesQ =
-                new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00107.mol");
-        FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00196.mol");
+                new FileReader("test/data/mol/C00107.mol");
+        FileReader smilesT = new FileReader("test/data/mol/C00196.mol");
         MDLV2000Reader readerQ = new MDLV2000Reader(smilesQ);
         MDLV2000Reader readerT = new MDLV2000Reader(smilesT);
         IAtomContainer moleculeQ = (IAtomContainer) readerQ.read(new AtomContainer());
