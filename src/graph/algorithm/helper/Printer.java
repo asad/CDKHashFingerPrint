@@ -16,11 +16,11 @@ import java.util.Stack;
 public class Printer {
 
     /**
-     * 
+     *
      * @param pathContainer
      * @param withCosts
      */
-    protected void printShortestPaths(ShortestPathContainer pathContainer, boolean withCosts) {
+    public void printShortestPaths(ShortestPathContainer pathContainer, boolean withCosts) {
         for (Map.Entry<AtomVertex, AtomVertex> entry : pathContainer.getAncestors().entrySet()) {
             if (withCosts) {
                 System.out.println("sink " + entry.getKey().toString() + " cost: "
@@ -32,10 +32,10 @@ public class Printer {
     }
 
     /**
-     * 
+     *
      * @param pathStack
      */
-    protected void printShortestPath(Stack<AtomVertex> pathStack) {
+    public void printShortestPath(Stack<AtomVertex> pathStack) {
         while (!pathStack.isEmpty()) {
             System.out.println("\t" + pathStack.pop());
         }
