@@ -33,8 +33,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.RingSet;
-import org.openscience.cdk.annotations.TestClass;
-import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -46,9 +44,8 @@ import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
-import fingerprints.helper.MoleculeWalker;
+import fingerprints.helper.MoleculeSPWalker;
 import fingerprints.helper.RandomNumber;
-import fingerprints.interfaces.IFingerprinter;
 import fingerprints.interfaces.IWalker;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
@@ -83,19 +80,21 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  * probability." In the case of very small molecules, the probability that you get the same fingerprint for different
  * molecules is high. </font> </p>
  *
- * @author Syed Asad Rahman (2011), Christoph Steinbeck (2002-2007) @cdk.created 07-11-2011 @cdk.keyword fingerprint
- * @cdk.keyword similarity @cdk.module standard @cdk.githash
+ * @author Syed Asad Rahman (2011-2012), Christoph Steinbeck (2002-2007) @cdk.created 07-11-2011 @cdk.keyword
+ * fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-@TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
-public class HashedFingerprinter extends RandomNumber implements IFingerprinter {
+public class HashedSPFingerprinter extends RandomNumber {
 
+    /**
+     * The default length of created fingerprints.
+     */
+    private int DEFAULT_SIZE = 1024;
     private int fingerprintLength;
     private boolean respectRingMatches;
     private boolean respectFormalCharges;
-    private int searchDepth;
     static int debugCounter = 0;
     private static ILoggingTool logger =
-            LoggingToolFactory.createLoggingTool(HashedFingerprinter.class);
+            LoggingToolFactory.createLoggingTool(HashedSPFingerprinter.class);
     private AllRingsFinder arf;
 
     /**
@@ -103,24 +102,14 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * <code>DEFAULT_SIZE</code> and with a search depth of
      * <code>DEFAULT_SEARCH_DEPTH</code>.
      */
-    public HashedFingerprinter() {
-        this(DEFAULT_SIZE, DEFAULT_SEARCH_DEPTH);
-    }
-
-    public HashedFingerprinter(int size) {
-        this(size, DEFAULT_SEARCH_DEPTH);
-    }
-
     /**
      * Constructs a fingerprint generator that creates fingerprints of the given fingerprintLength, using a generation
-     * algorithm with the given search depth.
+     * algorithm with shortest paths.
      *
      * @param fingerprintLength The desired fingerprintLength of the fingerprint
-     * @param searchDepth The desired depth of search
      */
-    public HashedFingerprinter(int fingerprintLength, int searchDepth) {
+    public HashedSPFingerprinter(int fingerprintLength) {
         this.fingerprintLength = fingerprintLength;
-        this.searchDepth = searchDepth;
         this.respectRingMatches = false;
         this.respectFormalCharges = false;
         this.arf = new AllRingsFinder();
@@ -129,15 +118,14 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     /**
      * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
      *
-     * @param container The AtomContainer for which a Fingerprint is generated
+     * @param atomContainer The AtomContainer for which a Fingerprint is generated
      * @param ringFinder An instance of
      *                   {@link org.openscience.cdk.ringsearch.AllRingsFinder}
      * @exception CDKException if there is a timeout in ring or aromaticity perception
      * @return A {@link BitSet} representing the fingerprint
      */
-    @TestMethod("testGetFingerprint_IAtomContainer")
-    @Override
-    public BitSet getFingerprint(IAtomContainer container,
+    public BitSet getFingerprint(
+            IAtomContainer atomContainer,
             AllRingsFinder ringFinder)
             throws CDKException {
         if (ringFinder != null) {
@@ -146,21 +134,30 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
-        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-        CDKHueckelAromaticityDetector.detectAromaticity(container);
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         long after = System.currentTimeMillis();
         logger.debug("time for aromaticity calculation: "
                 + (after - before) + " milliseconds");
         logger.debug("Finished Aromaticity Detection");
         BitSet bitSet = new BitSet(fingerprintLength);
+        if (!ConnectivityChecker.isConnected(atomContainer)) {
+            IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
+            for (IAtomContainer container : partitionedMolecules.atomContainers()) {
+                addUniquePath(container, bitSet);
+            }
+        } else {
+            addUniquePath(atomContainer, bitSet);
+        }
+        return bitSet;
+    }
 
-        Integer[] hashes = findPaths(container, searchDepth);
+    private void addUniquePath(IAtomContainer container, BitSet bitSet) {
+        Integer[] hashes = findPaths(container);
         for (Integer hash : hashes) {
             int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
             bitSet.set(position);
         }
-
-        return bitSet;
     }
 
     /**
@@ -170,29 +167,33 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * @return
      * @throws CDKException
      */
-    @TestMethod("testGetFingerprint_IAtomContainer")
-    @Override
     public BitSet getFingerprint(IAtomContainer container)
             throws CDKException {
         return getFingerprint(container, null);
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     *
+     * @param atomContainer
+     * @return
+     * @throws CDKException
+     */
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
             for (IAtomContainer container : partitionedMolecules.atomContainers()) {
-                addUniquePaths(container, uniquePaths);
+                addUniquePath(container, uniquePaths);
             }
         } else {
-            addUniquePaths(atomContainer, uniquePaths);
+            addUniquePath(atomContainer, uniquePaths);
         }
         return uniquePaths;
     }
 
-    private void addUniquePaths(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
-        Integer[] hashes = findPaths(atomContainer, searchDepth);
+    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
+        Integer[] hashes = findPaths(atomContainer);
         for (Integer hash : hashes) {
             int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
             uniquePaths.put(new Integer(position).toString(), hash);
@@ -206,12 +207,11 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * of such paths.
      *
      * @param container The molecule to search
-     * @param searchDepth The maximum path length desired
      * @return A map of path strings, keyed on themselves
      */
-    protected Integer[] findPaths(IAtomContainer container, int searchDepth) {
+    protected Integer[] findPaths(IAtomContainer container) {
 
-        IWalker walker = new MoleculeWalker(searchDepth, container);
+        IWalker walker = new MoleculeSPWalker(container);
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
         int patternIndex = 0;
@@ -264,18 +264,6 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         return paths.toArray(new Integer[paths.size()]);
     }
 
-    /**
-     *
-     * @return
-     */
-    @TestMethod("testGetSearchDepth")
-    @Override
-    public int getSearchDepth() {
-        return searchDepth;
-    }
-
-    @TestMethod("testGetSize")
-    @Override
     public int getSize() {
         return fingerprintLength;
     }
@@ -285,7 +273,6 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      *
      * @return the respect ring matches
      */
-    @Override
     public boolean isRespectRingMatches() {
         return respectRingMatches;
     }
@@ -295,7 +282,6 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      *
      * @param respectRingMatches respect the ring-to-ring matches and discard non-ring to ring matches
      */
-    @Override
     public void setRespectRingMatches(boolean respectRingMatches) {
         this.respectRingMatches = respectRingMatches;
     }

@@ -164,10 +164,8 @@ public class Dijkstra extends Printer {
     public List<Stack<AtomVertex>> getAllSinkShorestPath() {
         List<Stack<AtomVertex>> paths = new ArrayList<Stack<AtomVertex>>();
         for (AtomVertex destination : graph.getVertexSet()) {
-            if (source != destination) {
-                Stack<AtomVertex> reconstructedShortestPath = reconstructShortestPath(shortestPaths, destination);
-                paths.add(reconstructedShortestPath);
-            }
+            Stack<AtomVertex> reconstructedShortestPath = reconstructShortestPath(shortestPaths, destination);
+            paths.add(reconstructedShortestPath);
         }
         return paths;
     }
@@ -179,10 +177,8 @@ public class Dijkstra extends Printer {
      * @return
      */
     public Stack<AtomVertex> getSinkShorestPath(AtomVertex sink) {
-        Stack<AtomVertex> reconstructedShortestPath = null;
-        if (source != sink) {
-            reconstructedShortestPath = reconstructShortestPath(shortestPaths, sink);
-        }
+        Stack<AtomVertex> reconstructedShortestPath;
+        reconstructedShortestPath = reconstructShortestPath(shortestPaths, sink);
         return reconstructedShortestPath;
     }
 }

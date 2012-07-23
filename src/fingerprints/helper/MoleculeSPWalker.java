@@ -28,22 +28,23 @@ package fingerprints.helper;
 import java.io.Serializable;
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
-import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 import fingerprints.interfaces.IWalker;
+import graph.algorithm.Dijkstra;
+import graph.model.AtomContainerGraph;
+import graph.model.AtomVertex;
 
 /**
  *
- * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
+ * @author Syed Asad Rahman <asad@ebi.ac.uk> 2011-2012
  */
-public class MoleculeWalker implements IWalker, Serializable {
+public class MoleculeSPWalker implements IWalker, Serializable {
 
     private static final long serialVersionUID = 0x3b728f46;
-    private int maximumDepth;
     private final IAtomContainer atomContainer;
     private final Set<String> cleanPath;
     private final List<String> pseudoAtoms;
@@ -62,41 +63,16 @@ public class MoleculeWalker implements IWalker, Serializable {
 
     /**
      *
-     * @param maximumDepth
      * @param atomContainer
      */
-    public MoleculeWalker(int maximumDepth, IAtomContainer atomContainer) {
+    public MoleculeSPWalker(IAtomContainer atomContainer) {
         this.cleanPath = new HashSet<String>();
         this.atomContainer = atomContainer;
-        this.maximumDepth = maximumDepth;
         this.pseudoAtoms = new ArrayList<String>();
         this.pseduoAtomCounter = 0;
         this.allPaths = new ArrayList<StringBuffer>();
         this.cache = new HashMap<IAtom, Map<IAtom, IBond>>();
-
         findPaths();
-    }
-
-    /**
-     *
-     * @param atomContainer
-     */
-    public MoleculeWalker(IAtomContainer atomContainer) {
-        this(atomContainer.getAtomCount(), atomContainer);
-    }
-
-    /**
-     * @return the maximumDepth
-     */
-    public int getMaximumDepth() {
-        return maximumDepth;
-    }
-
-    /**
-     * @param maximumDepth
-     */
-    public void setMaximumDepth(int maximumDepth) {
-        this.maximumDepth = maximumDepth;
     }
 
     /**
@@ -136,11 +112,13 @@ public class MoleculeWalker implements IWalker, Serializable {
     }
 
     private void getBondSensetivePaths() {
-        for (IAtom sourceAtom : atomContainer.atoms()) {
-            List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(atomContainer, sourceAtom, getMaximumDepth());
-            for (List<IAtom> path : pathsOfLengthUpto) {
+        AtomContainerGraph atomContainerGraph = new AtomContainerGraph(atomContainer, true);
+        for (AtomVertex sourceAtom : atomContainerGraph.getVertexSet()) {
+            Dijkstra dijkstraSP = new Dijkstra(atomContainerGraph, sourceAtom);
+            for (AtomVertex sinkAtom : atomContainerGraph.getVertexSet()) {
+                Stack<AtomVertex> path = dijkstraSP.getSinkShorestPath(sinkAtom);
                 StringBuffer sb = new StringBuffer();
-                IAtom x = path.get(0);
+                IAtom x = path.get(0).getAtom();
 
                 if (x instanceof IPseudoAtom) {
                     if (!pseudoAtoms.contains(x.getSymbol())) {
@@ -159,7 +137,7 @@ public class MoleculeWalker implements IWalker, Serializable {
                 }
 
                 for (int i = 1; i < path.size(); i++) {
-                    final IAtom[] y = {path.get(i)};
+                    final IAtom[] y = {path.get(i).getAtom()};
                     Map<IAtom, IBond> m = cache.get(x);
                     final IBond[] b = {m != null ? m.get(y[0]) : null};
                     if (b[0] == null) {
@@ -187,16 +165,20 @@ public class MoleculeWalker implements IWalker, Serializable {
                 } else {
                     allPaths.add(revForm);
                 }
+
+                path.clear();
             }
         }
     }
 
     private void getBondInSensetivePaths() {
-        for (IAtom sourceAtom : atomContainer.atoms()) {
-            List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(atomContainer, sourceAtom, getMaximumDepth());
-            for (List<IAtom> path : pathsOfLengthUpto) {
+        AtomContainerGraph atomContainerGraph = new AtomContainerGraph(atomContainer, false);
+        for (AtomVertex sourceAtom : atomContainerGraph.getVertexSet()) {
+            Dijkstra dijkstraSP = new Dijkstra(atomContainerGraph, sourceAtom);
+            for (AtomVertex sinkAtom : atomContainerGraph.getVertexSet()) {
+                Stack<AtomVertex> path = dijkstraSP.getSinkShorestPath(sinkAtom);
                 StringBuffer sb = new StringBuffer();
-                IAtom x = path.get(0);
+                IAtom x = path.get(0).getAtom();
 
                 if (x instanceof IPseudoAtom) {
                     if (!pseudoAtoms.contains(x.getSymbol())) {
@@ -215,7 +197,7 @@ public class MoleculeWalker implements IWalker, Serializable {
                 }
 
                 for (int i = 1; i < path.size(); i++) {
-                    final IAtom[] y = {path.get(i)};
+                    final IAtom[] y = {path.get(i).getAtom()};
                     Map<IAtom, IBond> m = cache.get(x);
                     final IBond[] b = {m != null ? m.get(y[0]) : null};
                     if (b[0] == null) {
@@ -243,6 +225,7 @@ public class MoleculeWalker implements IWalker, Serializable {
                 } else {
                     allPaths.add(revForm);
                 }
+                path.clear();
             }
         }
     }
@@ -304,7 +287,7 @@ public class MoleculeWalker implements IWalker, Serializable {
      */
     private String getBondInSensitiveSymbol(IBond bond) {
         String bondSymbol = "";
-        
+
         if (bond.getOrder() == IBond.Order.SINGLE) {
             bondSymbol += "-";
         } else if (bond.getOrder() == IBond.Order.DOUBLE) {

@@ -52,8 +52,10 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
             AtomVertex v2 = getVertexLookupMap().get(bond.getAtom(1));
             if (weighted) {
                 addEdge(v1, new Edge(v2, (bond.getOrder().ordinal() + 1)));
+                addEdge(v2, new Edge(v1, (bond.getOrder().ordinal() + 1)));
             } else {
                 addEdge(v1, new Edge(v2, 1));
+                addEdge(v2, new Edge(v1, 1));
             }
         }
     }
