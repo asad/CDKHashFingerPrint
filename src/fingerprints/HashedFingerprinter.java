@@ -50,6 +50,7 @@ import fingerprints.helper.MoleculeWalker;
 import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.IFingerprinter;
 import fingerprints.interfaces.IWalker;
+import java.util.Comparator;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
@@ -88,7 +89,7 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  */
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
 public class HashedFingerprinter extends RandomNumber implements IFingerprinter {
-
+    
     private int fingerprintLength;
     private boolean respectRingMatches;
     private boolean respectFormalCharges;
@@ -106,7 +107,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     public HashedFingerprinter() {
         this(DEFAULT_SIZE, DEFAULT_SEARCH_DEPTH);
     }
-
+    
     public HashedFingerprinter(int size) {
         this(size, DEFAULT_SEARCH_DEPTH);
     }
@@ -137,7 +138,8 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
     @Override
-    public BitSet getFingerprint(IAtomContainer container,
+    public BitSet getFingerprint(
+            IAtomContainer container,
             AllRingsFinder ringFinder)
             throws CDKException {
         if (ringFinder != null) {
@@ -153,14 +155,24 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 + (after - before) + " milliseconds");
         logger.debug("Finished Aromaticity Detection");
         BitSet bitSet = new BitSet(fingerprintLength);
-
+        
+        if (!ConnectivityChecker.isConnected(container)) {
+            IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(container);
+            for (IAtomContainer atomContainer : partitionedMolecules.atomContainers()) {
+                addUniquePath(atomContainer, bitSet);
+            }
+        } else {
+            addUniquePath(container, bitSet);
+        }
+        return bitSet;
+    }
+    
+    private void addUniquePath(IAtomContainer container, BitSet bitSet) {
         Integer[] hashes = findPaths(container, searchDepth);
         for (Integer hash : hashes) {
             int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
             bitSet.set(position);
         }
-
-        return bitSet;
     }
 
     /**
@@ -176,7 +188,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
             throws CDKException {
         return getFingerprint(container, null);
     }
-
+    
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
@@ -190,7 +202,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         }
         return uniquePaths;
     }
-
+    
     private void addUniquePaths(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
         Integer[] hashes = findPaths(atomContainer, searchDepth);
         for (Integer hash : hashes) {
@@ -210,7 +222,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * @return A map of path strings, keyed on themselves
      */
     protected Integer[] findPaths(IAtomContainer container, int searchDepth) {
-
+        
         IWalker walker = new MoleculeWalker(searchDepth, container);
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
@@ -220,7 +232,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
-
+        
         if (isRespectRingMatches()) {
             IRingSet rings = new RingSet();
             IRingSet allRings;
@@ -248,7 +260,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 }
             }
         }
-
+        
         if (isRespectFormalCharges()) {
             for (IAtom atom : container.atoms()) {
                 int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
@@ -260,7 +272,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 }
             }
         }
-
+        
         return paths.toArray(new Integer[paths.size()]);
     }
 
@@ -273,7 +285,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     public int getSearchDepth() {
         return searchDepth;
     }
-
+    
     @TestMethod("testGetSize")
     @Override
     public int getSize() {
