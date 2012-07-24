@@ -65,7 +65,7 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
     // do all ring perception
     private AllRingsFinder arf;
     private static ILoggingTool logger =
-            LoggingToolFactory.createLoggingTool(HashedFingerprinter.class);
+            LoggingToolFactory.createLoggingTool(HashedBloomFingerprinter.class);
 
     /**
      * Creates a fingerprint generator of length <code>DEFAULT_SIZE</code>
