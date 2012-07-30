@@ -35,8 +35,9 @@ public class SubgraphTest {
 
     /**
      * Test of Fingerprinter method
+     *
      * @throws InvalidSmilesException
-     * @throws CDKException  
+     * @throws CDKException
      */
     @Test
     public static void testIsSubgraph1() throws InvalidSmilesException, CDKException {
@@ -53,9 +54,10 @@ public class SubgraphTest {
 
     /**
      * Test of Fingerprinter method
+     *
      * @throws InvalidSmilesException
      * @throws CDKException
-     * @throws FileNotFoundException  
+     * @throws FileNotFoundException
      */
     @Test
     public static void testIsSubgraph2() throws InvalidSmilesException, CDKException, FileNotFoundException {
@@ -78,7 +80,7 @@ public class SubgraphTest {
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
         moleculeT = AtomContainerManipulator.removeHydrogens(moleculeT);
 
-        boolean uit = UniversalIsomorphismTester.isSubgraph(moleculeT, moleculeQ);
+        boolean uit = new UniversalIsomorphismTester().isSubgraph(moleculeT, moleculeQ);
         boolean vf2 = new VF2(moleculeQ, moleculeT, true, false).isSubgraph();
 
         System.out.println("isSubset: " + vf2);
