@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
@@ -114,7 +115,7 @@ public class BenchmarkHashedFingerprint extends Base {
                 try {
                     BitSet hashedFingerPrint = null;
                     if (args.length > 1 && args[1].equals("cdk")) {
-                        hashedFingerPrint = getCDKFingerprint(ac);
+                        hashedFingerPrint = getCDKFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     } else if (args.length > 1 && args[1].equals("hash")) {
                         hashedFingerPrint = getHashedFingerprint(ac);
@@ -191,8 +192,8 @@ public class BenchmarkHashedFingerprint extends Base {
         return df.format((System.currentTimeMillis() - startTime) / (1000 * 60.0)); //*60 for hrs
     }
 
-    private static BitSet getCDKFingerprint(IAtomContainer ac) throws CDKException {
-        return cdkFingerprint.getFingerprint(ac);
+    private static IBitFingerprint getCDKFingerprint(IAtomContainer ac) throws CDKException {
+        return cdkFingerprint.getBitFingerprint(ac);
     }
 
     private static BitSet getHashedFingerprint(IAtomContainer ac) throws CDKException {

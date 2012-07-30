@@ -125,7 +125,7 @@ public class BenchmarkIsomorphism extends Base {
                 for (Data original : dataMap.values()) {
                     boolean UIT = false;
                     boolean TrueMatch = false;
-                    UIT = UniversalIsomorphismTester.isSubgraph(
+                    UIT = new UniversalIsomorphismTester().isSubgraph(
                             original.getAtomContainer(),
                             fragment.getAtomContainer());
                     TrueMatch = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, false).isSubgraph();
