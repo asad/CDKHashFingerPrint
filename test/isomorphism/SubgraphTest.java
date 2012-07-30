@@ -48,7 +48,7 @@ public class SubgraphTest {
         System.out.println("Atom count " + molecule.getAtomCount());
         IFingerprinter fingerprint = new HashedFingerprinter(1024);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("fp " + fingerprint1.toString());
     }
 

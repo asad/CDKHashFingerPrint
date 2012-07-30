@@ -42,7 +42,7 @@ public class HashedBloomFingerprinterTest {
         System.out.println("Atom count " + molecule.getAtomCount());
         IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("fp " + fingerprint1.toString());
     }
 
@@ -66,8 +66,8 @@ public class HashedBloomFingerprinterTest {
         IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
-        fingerprintQ = fingerprint.getFingerprint(moleculeQ);
-        fingerprintT = fingerprint.getFingerprint(moleculeT);
+        fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
 
         System.out.println("fpQ " + fingerprintQ.toString());
         System.out.println("fpT " + fingerprintT.toString());
@@ -99,8 +99,8 @@ public class HashedBloomFingerprinterTest {
         IFingerprinter fingerprint = new HashedBloomFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
-        fingerprintQ = fingerprint.getFingerprint(moleculeQ);
-        fingerprintT = fingerprint.getFingerprint(moleculeT);
+        fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
 
         System.out.println("fpQ " + fingerprintQ.toString());
         System.out.println("fpT " + fingerprintT.toString());
@@ -127,8 +127,8 @@ public class HashedBloomFingerprinterTest {
         fingerprint.setRespectRingMatches(true);
         BitSet fingerprintQ;
         BitSet fingerprintT;
-        fingerprintQ = fingerprint.getFingerprint(moleculeQ);
-        fingerprintT = fingerprint.getFingerprint(moleculeT);
+        fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
 
         System.out.println("fpQ " + fingerprintQ.toString());
         System.out.println("fpT " + fingerprintT.toString());
@@ -160,8 +160,8 @@ public class HashedBloomFingerprinterTest {
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
         IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
 
-        fingerprintQ = fingerprint.getFingerprint(removeHydrogens);
-        fingerprintT = fingerprint.getFingerprint(removeHydrogens1);
+        fingerprintQ = fingerprint.getBitFingerprint(removeHydrogens).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(removeHydrogens1).asBitSet();
 
         System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
         System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());
@@ -193,8 +193,8 @@ public class HashedBloomFingerprinterTest {
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
         IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
 
-        fingerprintQ = fingerprint.getFingerprint(removeHydrogens);
-        fingerprintT = fingerprint.getFingerprint(removeHydrogens1);
+        fingerprintQ = fingerprint.getBitFingerprint(removeHydrogens).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(removeHydrogens1).asBitSet();
 
         System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
         System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());

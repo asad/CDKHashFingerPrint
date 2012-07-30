@@ -29,7 +29,7 @@ public class RingSearchTestCases {
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("Naphthalene fp " + fingerprint1.toString());
     }
 
@@ -44,7 +44,7 @@ public class RingSearchTestCases {
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("Anthracene fp " + fingerprint1.toString());
     }
 
@@ -60,7 +60,7 @@ public class RingSearchTestCases {
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println(" Multiphtalene fp " + fingerprint1.toString());
     }
 }
