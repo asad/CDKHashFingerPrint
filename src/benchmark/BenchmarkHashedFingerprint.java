@@ -118,10 +118,10 @@ public class BenchmarkHashedFingerprint extends Base {
                         hashedFingerPrint = getCDKFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     } else if (args.length > 1 && args[1].equals("hash")) {
-                        hashedFingerPrint = getHashedFingerprint(ac);
+                        hashedFingerPrint = getHashedFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     } else if (args.length > 1 && args[1].equals("hashbloom")) {
-                        hashedFingerPrint = getHashedBloomFingerprint(ac);
+                        hashedFingerPrint = getHashedBloomFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
                 } catch (Exception e) {
@@ -196,11 +196,11 @@ public class BenchmarkHashedFingerprint extends Base {
         return cdkFingerprint.getBitFingerprint(ac);
     }
 
-    private static BitSet getHashedFingerprint(IAtomContainer ac) throws CDKException {
-        return fingerprint1.getFingerprint(ac);
+    private static IBitFingerprint getHashedFingerprint(IAtomContainer ac) throws CDKException {
+        return fingerprint1.getBitFingerprint(ac);
     }
 
-    private static BitSet getHashedBloomFingerprint(IAtomContainer ac) throws CDKException {
-        return fingerprint2.getFingerprint(ac);
+    private static IBitFingerprint getHashedBloomFingerprint(IAtomContainer ac) throws CDKException {
+        return fingerprint2.getBitFingerprint(ac);
     }
 }

@@ -47,15 +47,26 @@ import fingerprints.helper.MoleculeWalker;
 import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.IFingerprinter;
 import fingerprints.interfaces.IWalker;
+import org.openscience.cdk.fingerprint.BitSetFingerprint;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.ICountFingerprint;
 
 /*
- * 
+ *
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
- * 
+ *
  */
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
 public class HashedBloomFingerprinter extends RandomNumber implements IFingerprinter {
 
+    /**
+     * The default length of created fingerprints.
+     */
+    public final static int DEFAULT_SIZE = 1024;
+    /**
+     * The default search depth used to create the fingerprints.
+     */
+    public final static int DEFAULT_SEARCH_DEPTH = 8;
     private int fingerPrintSize;
     private BloomFilter<String> bloomFilter;
     private int ringBitCount;
@@ -68,8 +79,9 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
             LoggingToolFactory.createLoggingTool(HashedBloomFingerprinter.class);
 
     /**
-     * Creates a fingerprint generator of length <code>DEFAULT_SIZE</code>
-     * and with a search depth of <code>DEFAULT_SEARCH_DEPTH</code>.
+     * Creates a fingerprint generator of length
+     * <code>DEFAULT_SIZE</code> and with a search depth of
+     * <code>DEFAULT_SEARCH_DEPTH</code>.
      */
     public HashedBloomFingerprinter() {
         this(DEFAULT_SIZE, DEFAULT_SEARCH_DEPTH);
@@ -80,12 +92,11 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
     }
 
     /**
-     * Constructs a fingerprint generator that creates fingerprints of
-     * the given fingerPrintSize, using a generation algorithm with the given search
-     * depth.
+     * Constructs a fingerprint generator that creates fingerprints of the given fingerPrintSize, using a generation
+     * algorithm with the given search depth.
      *
-     * @param  fingerPrintSize The desired fingerPrintSize of the fingerprint
-     * @param  searchDepth The desired depth of search
+     * @param fingerPrintSize The desired fingerPrintSize of the fingerprint
+     * @param searchDepth The desired depth of search
      */
     public HashedBloomFingerprinter(int fingerPrintSize, int searchDepth) {
         this.searchDepth = searchDepth;
@@ -123,15 +134,13 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
      * Generates a fingerprint of the default fingerPrintSize for the given AtomContainer.
      *
      * @param container The AtomContainer for which a Fingerprint is generated
-     * @param ringFinder An instance of 
+     * @param ringFinder An instance of
      *                   {@link org.openscience.cdk.ringsearch.AllRingsFinder}
-     * @exception CDKException if there is a timeout in ring or aromaticity 
-     *                         perception
+     * @exception CDKException if there is a timeout in ring or aromaticity perception
      * @return A {@link BitSet} representing the fingerprint
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
-    @Override
-    public BitSet getFingerprint(IAtomContainer container,
+    public IBitFingerprint getFingerprint(IAtomContainer container,
             AllRingsFinder ringFinder)
             throws CDKException {
         if (ringFinder != null) {
@@ -147,7 +156,7 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
                 + (after - before) + " milliseconds");
         logger.debug("Finished Aromaticity Detection");
         findPaths(container, searchDepth);
-        return generateFingerprint(container);
+        return new BitSetFingerprint(generateFingerprint(container));
     }
 
     /**
@@ -155,19 +164,21 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
      *
      * @param container The AtomContainer for which a Fingerprint is generated
      * @return
-     * @throws CDKException  
+     * @throws CDKException
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
     @Override
-    public BitSet getFingerprint(IAtomContainer container)
+    public IBitFingerprint getBitFingerprint(IAtomContainer container)
             throws CDKException {
         return getFingerprint(container, null);
     }
 
-    /** {@inheritDoc}
+    /**
+     * {@inheritDoc}
+     *
      * @param atomContainer
-     * @return 
-     * @throws CDKException  
+     * @return
+     * @throws CDKException
      */
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
@@ -177,8 +188,8 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
     /**
      * Get all paths of lengths 0 to the specified length.
      *
-     * This method will find all paths upto length N starting from each
-     * atom in the molecule and return the unique set of such paths.
+     * This method will find all paths upto length N starting from each atom in the molecule and return the unique set
+     * of such paths.
      *
      * @param container The molecule to search
      * @param searchDepth The maximum path length desired
@@ -190,7 +201,7 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
     }
 
     /**
-     * 
+     *
      * @return
      */
     @TestMethod("testGetSearchDepth")
@@ -207,6 +218,7 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
 
     /**
      * Should match rings to rings and non-rings to non-rings
+     *
      * @return the respect ring matches
      */
     @Override
@@ -215,10 +227,9 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
     }
 
     /**
-     * Ring matches are allowed and non-ring to ring matches are
-     * discarded
-     * @param respectRingMatches respect the ring-to-ring matches 
-     * and discard non-ring to ring matches
+     * Ring matches are allowed and non-ring to ring matches are discarded
+     *
+     * @param respectRingMatches respect the ring-to-ring matches and discard non-ring to ring matches
      */
     @Override
     public void setRespectRingMatches(boolean respectRingMatches) {
@@ -267,5 +278,25 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
                 }
             }
         }
+    }
+
+    @Override
+    public IBitFingerprint getBitFingerprint(IAtomContainer container, AllRingsFinder ringFinder) throws CDKException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isRespectFormalCharges() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setRespectFormalCharges(boolean respectFormalCharges) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -26,6 +26,7 @@
  */
 package fingerprints;
 
+import fingerprints.interfaces.IFingerprinter;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -48,9 +49,10 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import fingerprints.helper.MoleculeWalker;
 import fingerprints.helper.RandomNumber;
-import fingerprints.interfaces.IFingerprinter;
 import fingerprints.interfaces.IWalker;
-import java.util.Comparator;
+import org.openscience.cdk.fingerprint.BitSetFingerprint;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
@@ -89,12 +91,19 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  */
 @TestClass("org.openscience.cdk.fingerprint.FingerprinterTest")
 public class HashedFingerprinter extends RandomNumber implements IFingerprinter {
-    
+
+    /**
+     * The default length of created fingerprints.
+     */
+    public final static int DEFAULT_SIZE = 1024;
+    /**
+     * The default search depth used to create the fingerprints.
+     */
+    public final static int DEFAULT_SEARCH_DEPTH = 8;
     private int fingerprintLength;
     private boolean respectRingMatches;
     private boolean respectFormalCharges;
     private int searchDepth;
-    static int debugCounter = 0;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(HashedFingerprinter.class);
     private AllRingsFinder arf;
@@ -107,7 +116,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     public HashedFingerprinter() {
         this(DEFAULT_SIZE, DEFAULT_SEARCH_DEPTH);
     }
-    
+
     public HashedFingerprinter(int size) {
         this(size, DEFAULT_SEARCH_DEPTH);
     }
@@ -137,8 +146,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * @return A {@link BitSet} representing the fingerprint
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
-    @Override
-    public BitSet getFingerprint(
+    public IBitFingerprint getBitFingerprint(
             IAtomContainer container,
             AllRingsFinder ringFinder)
             throws CDKException {
@@ -155,7 +163,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 + (after - before) + " milliseconds");
         logger.debug("Finished Aromaticity Detection");
         BitSet bitSet = new BitSet(fingerprintLength);
-        
+
         if (!ConnectivityChecker.isConnected(container)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(container);
             for (IAtomContainer atomContainer : partitionedMolecules.atomContainers()) {
@@ -164,9 +172,9 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         } else {
             addUniquePath(container, bitSet);
         }
-        return bitSet;
+        return new BitSetFingerprint(bitSet);
     }
-    
+
     private void addUniquePath(IAtomContainer container, BitSet bitSet) {
         Integer[] hashes = findPaths(container, searchDepth);
         for (Integer hash : hashes) {
@@ -184,11 +192,11 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
     @Override
-    public BitSet getFingerprint(IAtomContainer container)
+    public IBitFingerprint getBitFingerprint(IAtomContainer container)
             throws CDKException {
-        return getFingerprint(container, null);
+        return getBitFingerprint(container, null);
     }
-    
+
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
@@ -202,7 +210,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         }
         return uniquePaths;
     }
-    
+
     private void addUniquePaths(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
         Integer[] hashes = findPaths(atomContainer, searchDepth);
         for (Integer hash : hashes) {
@@ -222,7 +230,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * @return A map of path strings, keyed on themselves
      */
     protected Integer[] findPaths(IAtomContainer container, int searchDepth) {
-        
+
         IWalker walker = new MoleculeWalker(searchDepth, container);
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
@@ -232,7 +240,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
-        
+
         if (isRespectRingMatches()) {
             IRingSet rings = new RingSet();
             IRingSet allRings;
@@ -260,7 +268,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 }
             }
         }
-        
+
         if (isRespectFormalCharges()) {
             for (IAtom atom : container.atoms()) {
                 int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
@@ -272,7 +280,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
                 }
             }
         }
-        
+
         return paths.toArray(new Integer[paths.size()]);
     }
 
@@ -285,7 +293,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     public int getSearchDepth() {
         return searchDepth;
     }
-    
+
     @TestMethod("testGetSize")
     @Override
     public int getSize() {
@@ -315,6 +323,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     /**
      * @return the respectFormalCharges
      */
+    @Override
     public boolean isRespectFormalCharges() {
         return respectFormalCharges;
     }
@@ -322,7 +331,13 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     /**
      * @param respectFormalCharges the flag to set if formal charge is checked
      */
+    @Override
     public void setRespectFormalCharges(boolean respectFormalCharges) {
         this.respectFormalCharges = respectFormalCharges;
+    }
+
+    @Override
+    public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
