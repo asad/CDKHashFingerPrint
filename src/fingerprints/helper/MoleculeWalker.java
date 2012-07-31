@@ -88,6 +88,7 @@ public class MoleculeWalker implements IWalker, Serializable {
     /**
      * @return the maximumDepth
      */
+    @Override
     public int getMaximumDepth() {
         return maximumDepth;
     }
@@ -95,6 +96,7 @@ public class MoleculeWalker implements IWalker, Serializable {
     /**
      * @param maximumDepth
      */
+    @Override
     public void setMaximumDepth(int maximumDepth) {
         this.maximumDepth = maximumDepth;
     }
@@ -208,7 +210,7 @@ public class MoleculeWalker implements IWalker, Serializable {
                 } else {
                     Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
                     if (atnum != null) {
-                        sb.append(toInSensitiveAtomPattern(x));
+                        sb.append(toAtomPattern(x));
                     } else {
                         sb.append((char) PeriodicTable.getElementCount() + 1);
                     }
@@ -230,7 +232,7 @@ public class MoleculeWalker implements IWalker, Serializable {
                                 });
                     }
                     sb.append(getBondInSensitiveSymbol(b[0]));
-                    sb.append(toInSensitiveAtomPattern(y[0]));
+                    sb.append(toAtomPattern(y[0]));
                     x = y[0];
                 }
 
@@ -248,22 +250,6 @@ public class MoleculeWalker implements IWalker, Serializable {
     }
 
     private String toAtomPattern(IAtom atom) {
-        Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
-        Integer atomicNumber = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
-        String atomConfiguration;
-        atomConfiguration = atom.getSymbol()
-                + ":" + stereoParity.toString()
-                + ":" + atomicNumber
-                + ":" + atom.getFlag(CDKConstants.ISINRING);
-
-        if (!patterns.containsKey(atomConfiguration)) {
-            String generatedPattern = generateNewPattern();
-            patterns.put(atomConfiguration, generatedPattern);
-        }
-        return patterns.get(atomConfiguration);
-    }
-
-    private String toInSensitiveAtomPattern(IAtom atom) {
         String atomConfiguration;
         atomConfiguration = atom.getSymbol();
         if (!patterns.containsKey(atomConfiguration)) {
@@ -304,8 +290,10 @@ public class MoleculeWalker implements IWalker, Serializable {
      */
     private String getBondInSensitiveSymbol(IBond bond) {
         String bondSymbol = "";
-        
-        if (bond.getOrder() == IBond.Order.SINGLE) {
+
+        if (bond.getFlag(CDKConstants.ISINRING)) {
+            bondSymbol += "@";
+        } else if (bond.getOrder() == IBond.Order.SINGLE) {
             bondSymbol += "-";
         } else if (bond.getOrder() == IBond.Order.DOUBLE) {
             bondSymbol += "-";

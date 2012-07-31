@@ -13,6 +13,11 @@ import java.util.Set;
 public interface IWalker {
 
     /**
+     * @return the maximumDepth
+     */
+    int getMaximumDepth();
+
+    /**
      * @return the cleanPath
      */
     int getPathCount();
@@ -21,4 +26,10 @@ public interface IWalker {
      * @return the cleanPath
      */
     Set<String> getPaths();
+
+    /**
+     * @param maximumDepth
+     */
+    void setMaximumDepth(int maximumDepth);
+    
 }
