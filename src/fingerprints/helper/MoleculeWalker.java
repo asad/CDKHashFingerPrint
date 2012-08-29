@@ -27,7 +27,6 @@ package fingerprints.helper;
 
 import java.io.Serializable;
 import java.util.*;
-import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -35,6 +34,7 @@ import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 import fingerprints.interfaces.IWalker;
+import org.openscience.cdk.interfaces.*;
 
 /**
  *
@@ -43,22 +43,13 @@ import fingerprints.interfaces.IWalker;
 public class MoleculeWalker implements IWalker, Serializable {
 
     private static final long serialVersionUID = 0x3b728f46;
-    private int maximumDepth;
     private final IAtomContainer atomContainer;
     private final Set<String> cleanPath;
     private final List<String> pseudoAtoms;
     private int pseduoAtomCounter;
     private final List<StringBuffer> allPaths;
     private final Map<IAtom, Map<IAtom, IBond>> cache;
-    private static final Map<String, String> patterns = new HashMap<String, String>() {
-
-        private static final long serialVersionUID = 3348458944893841L;
-
-        {
-            put("R", "*");
-            put("X", "**");
-        }
-    };
+    private final int maximumDepth;
 
     /**
      *
@@ -73,7 +64,6 @@ public class MoleculeWalker implements IWalker, Serializable {
         this.pseduoAtomCounter = 0;
         this.allPaths = new ArrayList<StringBuffer>();
         this.cache = new HashMap<IAtom, Map<IAtom, IBond>>();
-
         findPaths();
     }
 
@@ -94,14 +84,6 @@ public class MoleculeWalker implements IWalker, Serializable {
     }
 
     /**
-     * @param maximumDepth
-     */
-    @Override
-    public void setMaximumDepth(int maximumDepth) {
-        this.maximumDepth = maximumDepth;
-    }
-
-    /**
      * @return the cleanPath
      */
     @Override
@@ -119,25 +101,17 @@ public class MoleculeWalker implements IWalker, Serializable {
 
     private void findPaths() {
         pseudoAtoms.clear();
-        getBondSensetivePaths();
-        getBondInSensetivePaths();
+        getBondPaths();
         for (StringBuffer s : allPaths) {
             String s1 = s.toString().trim();
             if (s1.equals("")) {
                 continue;
             }
-            if (cleanPath.contains(s1)) {
-                continue;
-            }
-            String s2 = s.reverse().toString().trim();
-            if (cleanPath.contains(s2)) {
-                continue;
-            }
-            cleanPath.add(s2);
+            cleanPath.add(s1);
         }
     }
 
-    private void getBondSensetivePaths() {
+    private void getBondPaths() {
         for (IAtom sourceAtom : atomContainer.atoms()) {
             List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(atomContainer, sourceAtom, getMaximumDepth());
             for (List<IAtom> path : pathsOfLengthUpto) {
@@ -185,78 +159,20 @@ public class MoleculeWalker implements IWalker, Serializable {
                 StringBuffer revForm = new StringBuffer(sb);
                 revForm.reverse();
                 if (sb.toString().compareTo(revForm.toString()) <= 0) {
-                    allPaths.add(sb);
-                } else {
-                    allPaths.add(revForm);
-                }
-            }
-        }
-    }
-
-    private void getBondInSensetivePaths() {
-        for (IAtom sourceAtom : atomContainer.atoms()) {
-            List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(atomContainer, sourceAtom, getMaximumDepth());
-            for (List<IAtom> path : pathsOfLengthUpto) {
-                StringBuffer sb = new StringBuffer();
-                IAtom x = path.get(0);
-
-                if (x instanceof IPseudoAtom) {
-                    if (!pseudoAtoms.contains(x.getSymbol())) {
-                        pseudoAtoms.add(pseduoAtomCounter, x.getSymbol());
-                        pseduoAtomCounter += 1;
+                    if (!allPaths.contains(sb)) {
+                        allPaths.add(sb);
                     }
-                    sb.append((char) (PeriodicTable.getElementCount()
-                            + pseudoAtoms.indexOf(x.getSymbol()) + 1));
                 } else {
-                    Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
-                    if (atnum != null) {
-                        sb.append(toAtomPattern(x));
-                    } else {
-                        sb.append((char) PeriodicTable.getElementCount() + 1);
+                    if (!allPaths.contains(revForm)) {
+                        allPaths.add(revForm);
                     }
-                }
-
-                for (int i = 1; i < path.size(); i++) {
-                    final IAtom[] y = {path.get(i)};
-                    Map<IAtom, IBond> m = cache.get(x);
-                    final IBond[] b = {m != null ? m.get(y[0]) : null};
-                    if (b[0] == null) {
-                        b[0] = atomContainer.getBond(x, y[0]);
-                        cache.put(x,
-                                new HashMap<IAtom, IBond>() {
-
-                                    {
-                                        put(y[0], b[0]);
-                                    }
-                                    private static final long serialVersionUID = 0xb3a7a32449fL;
-                                });
-                    }
-                    sb.append(getBondInSensitiveSymbol(b[0]));
-                    sb.append(toAtomPattern(y[0]));
-                    x = y[0];
-                }
-
-                // we store the lexicographically lower one of the
-                // string and its reverse
-                StringBuffer revForm = new StringBuffer(sb);
-                revForm.reverse();
-                if (sb.toString().compareTo(revForm.toString()) <= 0) {
-                    allPaths.add(sb);
-                } else {
-                    allPaths.add(revForm);
                 }
             }
         }
     }
 
     private String toAtomPattern(IAtom atom) {
-        String atomConfiguration;
-        atomConfiguration = atom.getSymbol();
-        if (!patterns.containsKey(atomConfiguration)) {
-            String generatedPattern = generateNewPattern();
-            patterns.put(atomConfiguration, generatedPattern);
-        }
-        return patterns.get(atomConfiguration);
+        return atom.getSymbol();
     }
 
     /**
@@ -265,54 +181,35 @@ public class MoleculeWalker implements IWalker, Serializable {
      * @param bond Description of the Parameter
      * @return The bondSymbol value
      */
-    private String getBondSymbol(IBond bond) {
-        String bondSymbol = "";
-        if (bond.getFlag(CDKConstants.ISAROMATIC)) {
-            bondSymbol += "@";
-        } else if (bond.getOrder() == IBond.Order.SINGLE) {
-            bondSymbol += "-";
-        } else if (bond.getOrder() == IBond.Order.DOUBLE) {
-            bondSymbol += "=";
-        } else if (bond.getOrder() == IBond.Order.TRIPLE) {
-            bondSymbol += "#";
-        } else if (bond.getOrder() == IBond.Order.QUADRUPLE) {
-            return "&";
+    private char getBondSymbol(IBond bond) {
+        if (isSP2Bond(bond)) {
+            return '@';
+        } else {
+            switch (bond.getOrder()) {
+                case SINGLE:
+                    return '1';
+                case DOUBLE:
+                    return '2';
+                case TRIPLE:
+                    return '3';
+                case QUADRUPLE:
+                    return '4';
+                default:
+                    return '5';
+            }
         }
-
-        return bondSymbol;
     }
 
     /**
-     * Gets the bondSymbol attribute of the HashedFingerprinter class
-     *
-     * @param bond Description of the Parameter
-     * @return The bondSymbol value
+     * Returns true if the bond binds two atoms, and both atoms are SP2.
      */
-    private String getBondInSensitiveSymbol(IBond bond) {
-        String bondSymbol = "";
-
-        if (bond.getFlag(CDKConstants.ISINRING)) {
-            bondSymbol += "@";
-        } else if (bond.getOrder() == IBond.Order.SINGLE) {
-            bondSymbol += "-";
-        } else if (bond.getOrder() == IBond.Order.DOUBLE) {
-            bondSymbol += "-";
-        } else if (bond.getOrder() == IBond.Order.TRIPLE) {
-            bondSymbol += "-";
-        } else if (bond.getOrder() == IBond.Order.QUADRUPLE) {
-            return "-";
+    private boolean isSP2Bond(IBond bond) {
+        if (bond.getAtomCount() == 2
+                && bond.getAtom(0).getHybridization() == IAtomType.Hybridization.SP2
+                && bond.getAtom(1).getHybridization() == IAtomType.Hybridization.SP2) {
+            return true;
         }
-
-        return bondSymbol;
-    }
-
-    private String generateNewPattern() {
-        int patternSize = patterns.size() + 1;
-        StringBuilder st = new StringBuilder(patternSize);
-        for (int i = 0; i < patternSize; i++) {
-            st.append('*');
-        }
-        return st.toString();
+        return false;
     }
 
     @Override

@@ -26,10 +26,4 @@ public interface IWalker {
      * @return the cleanPath
      */
     Set<String> getPaths();
-
-    /**
-     * @param maximumDepth
-     */
-    void setMaximumDepth(int maximumDepth);
-    
 }

@@ -32,8 +32,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.openscience.cdk.RingSet;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
@@ -50,6 +48,7 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import fingerprints.helper.MoleculeWalker;
 import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.IWalker;
+import java.util.*;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
@@ -103,6 +102,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     private int fingerprintLength;
     private boolean respectRingMatches;
     private boolean respectFormalCharges;
+    private boolean respectStereoAssignments;
     private int searchDepth;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(HashedFingerprinter.class);
@@ -133,6 +133,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         this.searchDepth = searchDepth;
         this.respectRingMatches = false;
         this.respectFormalCharges = false;
+        this.respectStereoAssignments = false;
         this.arf = new AllRingsFinder();
     }
 
@@ -235,52 +236,72 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
         int patternIndex = 0;
+
         for (String s : walker.getPaths()) {
-            int toHashCode = new HashCodeBuilder(17, 37).append(s).toHashCode();
+            int toHashCode = s.hashCode();
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
 
         if (isRespectRingMatches()) {
-            IRingSet rings = new RingSet();
-            IRingSet allRings;
-            try {
-                allRings = arf.findAllRings(container);
-                rings.add(allRings);
-            } catch (CDKException e) {
-                logger.debug(e.toString());
-            }
-
-            // sets SSSR information
             SSSRFinder finder = new SSSRFinder(container);
             IRingSet sssr = finder.findEssentialRings();
-            rings.add(sssr);
-            RingSetManipulator.markAromaticRings(rings);
-            RingSetManipulator.sort(rings);
-            int ringSize = 0;
-            for (IAtomContainer ring : rings.atomContainers()) {
-                int atomCount = ring.getAtomCount();
-                if (ringSize < atomCount) {
-                    int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
-                    paths.add(patternIndex, toHashCode);
-                    patternIndex++;
-                    ringSize++;
-                }
+            RingSetManipulator.sort(sssr);
+            int ringCounter = sssr.getAtomContainerCount();
+            for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
+                IAtomContainer ring = it.next();
+                int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
+                paths.add(patternIndex, toHashCode);
+                patternIndex++;
+                ringCounter--;
             }
         }
 
         if (isRespectFormalCharges()) {
-            for (IAtom atom : container.atoms()) {
+            List<String> l = new ArrayList<String>();
+            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+                IAtom atom = it.next();
                 int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
                 if (charge != 0) {
-                    String formalChargePattern = String.valueOf(charge);
-                    int toHashCode = new HashCodeBuilder(17, 37).append(formalChargePattern).toHashCode();
-                    paths.add(patternIndex, toHashCode);
-                    patternIndex++;
+                    l.add(atom.getSymbol().concat(String.valueOf(charge)));
                 }
             }
+            Collections.sort(l);
+            int toHashCode = l.hashCode();
+            paths.add(patternIndex, toHashCode);
+            patternIndex++;
         }
 
+        if (isRespectStereoAssignments()) {
+            List<String> l = new ArrayList<String>();
+            /*
+             * atom stereo parity
+             */
+            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+                IAtom atom = it.next();
+                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity().intValue();
+                if (st != 0) {
+                    l.add(atom.getSymbol().concat(String.valueOf(st)));
+                }
+            }
+            Collections.sort(l);
+            int toHashCode = l.hashCode();
+            paths.add(patternIndex, toHashCode);
+            patternIndex++;
+        }
+
+        if (container.getSingleElectronCount() > 0) {
+            StringBuilder radicalInformation = new StringBuilder();
+            radicalInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
+            paths.add(patternIndex, radicalInformation.toString().hashCode());
+            patternIndex++;
+        }
+        if (container.getLonePairCount() > 0) {
+            StringBuilder lpInformation = new StringBuilder();
+            lpInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
+            paths.add(patternIndex, lpInformation.toString().hashCode());
+            patternIndex++;
+        }
         return paths.toArray(new Integer[paths.size()]);
     }
 
@@ -334,6 +355,20 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     @Override
     public void setRespectFormalCharges(boolean respectFormalCharges) {
         this.respectFormalCharges = respectFormalCharges;
+    }
+
+    /**
+     * @return the respectStereoAssignments
+     */
+    public boolean isRespectStereoAssignments() {
+        return respectStereoAssignments;
+    }
+
+    /**
+     * @param respectStereoAssignments the respectStereoAssignments to set
+     */
+    public void setRespectStereoAssignments(boolean respectStereoAssignments) {
+        this.respectStereoAssignments = respectStereoAssignments;
     }
 
     @Override
