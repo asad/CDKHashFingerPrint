@@ -48,6 +48,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
+ * Chemical Fingerprint based on the atom neighbourhood information
  * Generates a fingerprint for a given {@link IAtomContainer}. Fingerprints are
  * one-dimensional bit arrays, where bits are set according to a the occurrence
  * of a particular structural feature (See for example the Daylight inc. theory
