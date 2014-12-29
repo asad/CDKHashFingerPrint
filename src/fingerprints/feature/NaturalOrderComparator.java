@@ -139,11 +139,11 @@ public class NaturalOrderComparator implements Comparator {
 
         String[] strings = new String[]{"3", "4", "6", "0", "T0", "0", "6", "A8", "B8"};
 //        String[] strings = new String[]{"3", "4", "6", "0", "A8", "T0", "6", "B8", "6"};
-        List orig = Arrays.asList(strings);
+        List<String> orig = Arrays.asList(strings);
 
         System.out.println("Original: " + orig);
 
-        List scrambled = Arrays.asList(strings);
+        List<String> scrambled = Arrays.asList(strings);
         Collections.shuffle(scrambled);
 
         System.out.println("Scrambled: " + scrambled);
