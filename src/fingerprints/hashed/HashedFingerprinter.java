@@ -24,7 +24,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package fingerprints;
+package fingerprints.hashed;
 
 import fingerprints.interfaces.IFingerprinter;
 import java.util.ArrayList;
@@ -147,6 +147,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
      * @return A {@link BitSet} representing the fingerprint
      */
     @TestMethod("testGetFingerprint_IAtomContainer")
+    @Override
     public IBitFingerprint getBitFingerprint(
             IAtomContainer container,
             AllRingsFinder ringFinder)
@@ -216,7 +217,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         Integer[] hashes = findPaths(atomContainer, searchDepth);
         for (Integer hash : hashes) {
             int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
-            uniquePaths.put(new Integer(position).toString(), hash);
+            uniquePaths.put(Integer.toString(position), hash);
         }
     }
 
@@ -259,9 +260,8 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
 
         if (isRespectFormalCharges()) {
             List<String> l = new ArrayList<String>();
-            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-                IAtom atom = it.next();
-                int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
+            for (IAtom atom : container.atoms()) {
+                int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
                 if (charge != 0) {
                     l.add(atom.getSymbol().concat(String.valueOf(charge)));
                 }
@@ -277,9 +277,8 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
             /*
              * atom stereo parity
              */
-            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-                IAtom atom = it.next();
-                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity().intValue();
+            for (IAtom atom : container.atoms()) {
+                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity();
                 if (st != 0) {
                     l.add(atom.getSymbol().concat(String.valueOf(st)));
                 }

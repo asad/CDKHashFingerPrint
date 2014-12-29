@@ -43,9 +43,10 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
 /**
- * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol new 2 1000 Test CDK default FP java -jar
- * dist/CDKHashedFingerprint.jar test/data/mol cdk 2 1000 Test new FP with ring matcher java -jar
- * dist/CDKHashedFingerprint.jar test/data/mol new 1 1000
+ * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol new 2 1000
+ * Test CDK default FP java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk
+ * 2 1000 Test new FP with ring matcher java -jar dist/CDKHashedFingerprint.jar
+ * test/data/mol new 1 1000
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
@@ -58,7 +59,7 @@ public class BenchmarkHashedFingerprint extends Base {
     private static long HITS;
     private static Map<String, Data> dataMap = new HashMap<String, Data>();
     private static IFingerprinter cdkFingerprint = new org.openscience.cdk.fingerprint.Fingerprinter(1024);
-    private static fingerprints.interfaces.IFingerprinter fingerprint1 = new fingerprints.HashedFingerprinter(1024);
+    private static fingerprints.interfaces.IFingerprinter fingerprint1 = new fingerprints.hashed.HashedFingerprinter(1024);
     private static fingerprints.interfaces.IFingerprinter fingerprint2 = new fingerprints.HashedBloomFingerprinter(1024);
 
     /**
@@ -76,8 +77,8 @@ public class BenchmarkHashedFingerprint extends Base {
         }
         System.out.print("\n***************************************\n");
 
-        Map<String, IAtomContainer> molecules =
-                readMDLMolecules(directory, expectedDataSize);
+        Map<String, IAtomContainer> molecules
+                = readMDLMolecules(directory, expectedDataSize);
         System.out.println("\rTotal number of mols read: " + molecules.size());
         int interval = (int) (0.10 * molecules.size());
         System.out.println("Intervals between data points: " + interval);
@@ -146,7 +147,8 @@ public class BenchmarkHashedFingerprint extends Base {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-                    VF2 sub = sub = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, false);
+                    VF2 sub;
+                    sub = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, true, false);
                     boolean TrueMatch = sub.isSubgraph();
 
                     if (FPMatch && TrueMatch) {

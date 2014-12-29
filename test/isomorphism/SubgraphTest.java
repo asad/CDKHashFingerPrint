@@ -1,6 +1,6 @@
 package isomorphism;
 
-import fingerprints.HashedFingerprinter;
+import fingerprints.hashed.HashedFingerprinter;
 import fingerprints.interfaces.IFingerprinter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,9 +62,8 @@ public class SubgraphTest {
     @Test
     public static void testIsSubgraph2() throws InvalidSmilesException, CDKException, FileNotFoundException {
 
-
-        FileReader smilesQ =
-                new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00107.mol");
+        FileReader smilesQ
+                = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00107.mol");
         FileReader smilesT = new FileReader(System.getProperty("user.home") + File.separator + "Software/GITROOT/Fingerprint/test/data/mol/C00196.mol");
         MDLV2000Reader readerQ = new MDLV2000Reader(smilesQ);
         MDLV2000Reader readerT = new MDLV2000Reader(smilesT);
@@ -81,7 +80,7 @@ public class SubgraphTest {
         moleculeT = AtomContainerManipulator.removeHydrogens(moleculeT);
 
         boolean uit = new UniversalIsomorphismTester().isSubgraph(moleculeT, moleculeQ);
-        boolean vf2 = new VF2(moleculeQ, moleculeT, true, false).isSubgraph();
+        boolean vf2 = new VF2(moleculeQ, moleculeT, true, true, false).isSubgraph();
 
         System.out.println("isSubset: " + vf2);
 

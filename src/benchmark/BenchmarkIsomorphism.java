@@ -40,9 +40,10 @@ import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.smsd.algorithm.vflib.substructure.VF2;
 
 /**
- * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol new 2 1000 Test CDK default FP java -jar
- * dist/CDKHashedFingerprint.jar test/data/mol cdk 2 1000 Test new FP with ring matcher java -jar
- * dist/CDKHashedFingerprint.jar test/data/mol new 1 1000
+ * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol new 2 1000
+ * Test CDK default FP java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk
+ * 2 1000 Test new FP with ring matcher java -jar dist/CDKHashedFingerprint.jar
+ * test/data/mol new 1 1000
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
@@ -70,8 +71,8 @@ public class BenchmarkIsomorphism extends Base {
         }
         System.out.print("\n***************************************\n");
 
-        Map<String, IAtomContainer> molecules =
-                readMDLMolecules(directory, expectedDataSize);
+        Map<String, IAtomContainer> molecules
+                = readMDLMolecules(directory, expectedDataSize);
         System.out.println("\rTotal number of mols read: " + molecules.size());
         int interval = (int) (0.10 * molecules.size());
         System.out.println("Intervals between data points: " + interval);
@@ -93,7 +94,6 @@ public class BenchmarkIsomorphism extends Base {
         System.out.print("FPR:" + "\t");
         System.out.println("Time (mins): ");
         System.out.print("------------------------------------------------------------------------------\n");
-
 
         for (int k = 0; k < molecules.size(); k += interval) {
             int counter = 1;
@@ -128,7 +128,7 @@ public class BenchmarkIsomorphism extends Base {
                     UIT = new UniversalIsomorphismTester().isSubgraph(
                             original.getAtomContainer(),
                             fragment.getAtomContainer());
-                    TrueMatch = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, false).isSubgraph();
+                    TrueMatch = new VF2(fragment.getAtomContainer(), original.getAtomContainer(), true, true, false).isSubgraph();
 
                     if (UIT && TrueMatch) {
                         TP++;
