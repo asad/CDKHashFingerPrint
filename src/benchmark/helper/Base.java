@@ -175,7 +175,6 @@ public class Base {
         AllRingsFinder ringFinder = null;
         if (ringFinder == null) {
             ringFinder = new AllRingsFinder();
-            ringFinder.setTimeout(5000);
         }
 
         IRingSet allRings;

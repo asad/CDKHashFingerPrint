@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Asad
  */
-public class NaturalOrderComparator implements Comparator {
+public class NaturalOrderComparator<T> implements Comparator {
 
     int compareRight(String a, String b) {
         int bias = 0;
