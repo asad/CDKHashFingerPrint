@@ -38,6 +38,7 @@ import org.openscience.cdk.fingerprint.Fingerprinter;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
+import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
@@ -245,6 +246,24 @@ public class FeatureFingerprinter implements IFingerprinter {
                 bitSet.set((int) (b % fingerprintSize));
             }
 
+            List<String> list = new ArrayList<>();
+            for (IAtom sourceAtom : clonedContainer.atoms()) {
+                List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(clonedContainer, sourceAtom, 5);
+                StringBuilder s = new StringBuilder();
+                for (List<IAtom> path : pathsOfLengthUpto) {
+                    for (IAtom a : path) {
+                        s.append(atomInvariantsMap.get(a));
+                    }
+                    s.trimToSize();
+                }
+                list.add(s.toString());
+            }
+            Collections.sort(list, new NaturalOrderComparator());
+            for (String s : list) {
+                int hashCode = s.hashCode();
+                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
+                bitSet.set((int) (b % fingerprintSize));
+            }
         } catch (CloneNotSupportedException exception) {
             throw new CDKException(
                     "Exception while cloning the input: " + exception.getMessage(),
