@@ -40,16 +40,16 @@ import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
+import org.openscience.cdk.ringsearch.RingSearch;
 import org.openscience.cdk.similarity.Tanimoto;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
- * Chemical Fingerprint based on the atom neighbourhood information
- * Generates a fingerprint for a given {@link IAtomContainer}. Fingerprints are
+ * Chemical Fingerprint based on the atom neighbourhood information Generates a
+ * fingerprint for a given {@link IAtomContainer}. Fingerprints are
  * one-dimensional bit arrays, where bits are set according to a the occurrence
  * of a particular structural feature (See for example the Daylight inc. theory
  * manual for more information). Fingerprints allow for a fast screening step to
@@ -188,7 +188,9 @@ public class FeatureFingerprinter implements IFingerprinter {
             } catch (CDKException ex) {
                 Logger.getLogger(FeatureGenerator.class.getName()).log(Level.SEVERE, null, ex);
             }
-            IRingSet findAllRings = arf.findAllRings(clonedContainer);
+
+            RingSearch ringSearch = null;
+            ringSearch = new RingSearch(container);
             /*
              Generate hashing information for atoms using connectivity information etc.
              */
@@ -213,7 +215,22 @@ public class FeatureFingerprinter implements IFingerprinter {
                 bitSet.set((int) (b % fingerprintSize));
             }
 
-            for (IAtomContainer ac : findAllRings.atomContainers()) {
+            for (IAtomContainer ac : ringSearch.fusedRingFragments()) {
+                List<String> list = new ArrayList<>();
+                for (IAtom a : ac.atoms()) {
+                    list.add(a.getSymbol());
+                }
+                Collections.sort(list, new NaturalOrderComparator());
+                StringBuilder s = new StringBuilder();
+                for (String f : list) {
+                    s.append(f);
+                }
+                int hashCode = s.toString().hashCode();
+                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
+                bitSet.set((int) (b % fingerprintSize));
+            }
+
+            for (IAtomContainer ac : ringSearch.isolatedRingFragments()) {
                 List<String> list = new ArrayList<>();
                 for (IAtom a : ac.atoms()) {
                     list.add(a.getSymbol());
