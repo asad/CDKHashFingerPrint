@@ -248,16 +248,17 @@ public class FeatureFingerprinter implements IFingerprinter {
 
             List<String> list = new ArrayList<>();
             for (IAtom sourceAtom : clonedContainer.atoms()) {
-                List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(clonedContainer, sourceAtom, 5);
+                List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(clonedContainer, sourceAtom, 2);
                 StringBuilder s = new StringBuilder();
                 for (List<IAtom> path : pathsOfLengthUpto) {
                     for (IAtom a : path) {
-                        s.append(a.getSymbol());
+                        s.append(atomInvariantsMap.get(a));//a.getSymbol()
                     }
                     s.trimToSize();
                 }/*
                  Add a path
                  */
+
                 list.add(s.toString());
             }
             Collections.sort(list, new NaturalOrderComparator());
