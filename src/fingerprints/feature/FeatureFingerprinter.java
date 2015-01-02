@@ -23,7 +23,6 @@
  */
 package fingerprints.feature;
 
-import static fingerprints.helper.RandomNumber.generateMersenneTwisterRandomNumber;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.RingSet;
 import org.openscience.cdk.exception.CDKException;
@@ -42,12 +40,10 @@ import org.openscience.cdk.fingerprint.Fingerprinter;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
-import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
-import org.openscience.cdk.ringsearch.RingSearch;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.similarity.Tanimoto;
 import org.openscience.cdk.smiles.SmilesParser;
