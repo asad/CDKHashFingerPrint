@@ -23,14 +23,18 @@
  */
 package fingerprints.feature;
 
+import static fingerprints.helper.RandomNumber.generateMersenneTwisterRandomNumber;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.RingSet;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
@@ -41,11 +45,14 @@ import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.ringsearch.RingSearch;
+import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.similarity.Tanimoto;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -190,8 +197,6 @@ public class FeatureFingerprinter implements IFingerprinter {
                 Logger.getLogger(FeatureGenerator.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            RingSearch ringSearch = null;
-            ringSearch = new RingSearch(container);
             /*
              Generate hashing information for atoms using connectivity information etc.
              */
@@ -216,63 +221,52 @@ public class FeatureFingerprinter implements IFingerprinter {
                 bitSet.set((int) (b % fingerprintSize));
             }
 
-            for (IAtomContainer ac : ringSearch.fusedRingFragments()) {
-                List<String> list = new ArrayList<>();
-                for (IAtom a : ac.atoms()) {
-                    list.add(a.getSymbol());
-                }
-                Collections.sort(list, new NaturalOrderComparator());
-                StringBuilder s = new StringBuilder();
-                for (String f : list) {
-                    s.append(f);
-                }
-                int hashCode = s.toString().hashCode();
-                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
-                bitSet.set((int) (b % fingerprintSize));
-            }
+            IRingSet rings = new RingSet();
+            // sets SSSR information
+            SSSRFinder finder = new SSSRFinder(container);
+            IRingSet sssr = finder.findEssentialRings();
+            rings.add(sssr);
+            RingSetManipulator.sort(rings);
+            setRingBits(bitSet, rings);
 
-            for (IAtomContainer ac : ringSearch.isolatedRingFragments()) {
-                List<String> list = new ArrayList<>();
-                for (IAtom a : ac.atoms()) {
-                    list.add(a.getSymbol());
-                }
-                Collections.sort(list, new NaturalOrderComparator());
-                StringBuilder s = new StringBuilder();
-                for (String f : list) {
-                    s.append(f);
-                }
-                int hashCode = s.toString().hashCode();
-                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
-                bitSet.set((int) (b % fingerprintSize));
-            }
-
-            List<String> list = new ArrayList<>();
-            for (IAtom sourceAtom : clonedContainer.atoms()) {
-                List<List<IAtom>> pathsOfLengthUpto = PathTools.getPathsOfLengthUpto(clonedContainer, sourceAtom, 2);
-                StringBuilder s = new StringBuilder();
-                for (List<IAtom> path : pathsOfLengthUpto) {
-                    for (IAtom a : path) {
-                        s.append(atomInvariantsMap.get(a));//a.getSymbol()
-                    }
-                    s.trimToSize();
-                }/*
-                 Add a path
-                 */
-
-                list.add(s.toString());
-            }
-            Collections.sort(list, new NaturalOrderComparator());
-            for (String s : list) {
-                int hashCode = s.hashCode();
-                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
-                bitSet.set((int) (b % fingerprintSize));
-            }
         } catch (CloneNotSupportedException exception) {
             throw new CDKException(
                     "Exception while cloning the input: " + exception.getMessage(),
                     exception);
         }
         return new BitSetFingerprint(bitSet);
+    }
+
+    private void setRingBits(BitSet bitSet, IRingSet rings) {
+        Map<String, Integer> ringMap = new HashMap<>();
+        for (IAtomContainer ring : rings.atomContainers()) {
+            List<String> list = new ArrayList<>();
+            for (IAtom a : ring.atoms()) {
+                list.add(a.getSymbol());
+            }
+            Collections.sort(list, new NaturalOrderComparator());
+            StringBuilder s = new StringBuilder();
+            for (String f : list) {
+                s.append(f);
+            }
+            s.trimToSize();
+            String pattern = s.toString();
+            if (ringMap.containsKey(pattern)) {
+                Integer counter = ringMap.get(pattern) + 1;
+                ringMap.put(pattern, counter);
+            } else {
+                ringMap.put(pattern, 1);
+            }
+        }
+
+        for (String p : ringMap.keySet()) {
+            int counter = ringMap.get(p);
+            while (counter-- > 0) {
+                int hashCode = p.concat(String.valueOf(counter)).hashCode();
+                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
+                bitSet.set((int) (b % fingerprintSize));
+            }
+        }
     }
 
     @Override
