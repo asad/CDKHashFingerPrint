@@ -36,7 +36,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -48,6 +47,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import java.util.*;
+import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
@@ -171,7 +171,7 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-        CDKHueckelAromaticityDetector.detectAromaticity(container);
+        Aromaticity.cdkLegacy().apply(container);
         long after = System.currentTimeMillis();
         logger.debug("time for aromaticity calculation: "
                 + (after - before) + " milliseconds");

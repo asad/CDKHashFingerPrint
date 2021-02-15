@@ -24,7 +24,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package com.bioinception.chem.fp.fingerprints;
+package com.bioinception.chem.fp.fingerprints.hashed;
 
 import com.bioinception.chem.fp.fingerprints.helper.BloomFilter;
 import com.bioinception.chem.fp.fingerprints.helper.MoleculeWalker;
@@ -36,12 +36,12 @@ import java.util.BitSet;
 import java.util.Map;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.RingSet;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
+import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.Intractable;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
-import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -49,6 +49,8 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.graph.CycleFinder;
+import org.openscience.cdk.graph.Cycles;
 
 /*
  *
@@ -150,7 +152,7 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-        CDKHueckelAromaticityDetector.detectAromaticity(container);
+        Aromaticity.cdkLegacy().apply(container);
         long after = System.currentTimeMillis();
         logger.debug("time for aromaticity calculation: "
                 + (after - before) + " milliseconds");
@@ -252,9 +254,16 @@ public class HashedBloomFingerprinter extends RandomNumber implements IFingerpri
             }
 
             // sets SSSR information
-            SSSRFinder finder = new SSSRFinder(container);
-            IRingSet sssr = finder.findEssentialRings();
-            rings.add(sssr);
+            CycleFinder cf = Cycles.mcb();
+            IRingSet allrings = null;
+            try {
+                Cycles cycles = cf.find(container);
+                allrings = cycles.toRingSet();
+                rings.add(allrings);
+            } catch (Intractable e) {
+                // ignore error - edge short cycles do not check tractability
+            }
+
             RingSetManipulator.markAromaticRings(rings);
             RingSetManipulator.sort(rings);
             setRingBits(result, rings);

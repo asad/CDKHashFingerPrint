@@ -28,7 +28,8 @@ package com.bioinception.chem.fp.benchmark;
 import com.bioinception.chem.fp.benchmark.helper.Base;
 import static com.bioinception.chem.fp.benchmark.helper.Base.readMDLMolecules;
 import com.bioinception.chem.fp.benchmark.helper.Data;
-import com.bioinception.chem.fp.fingerprints.HashedBloomFingerprinter;
+import com.bioinception.chem.fp.fingerprints.cdk.Fingerprinter;
+import com.bioinception.chem.fp.fingerprints.hashed.HashedBloomFingerprinter;
 import com.bioinception.chem.fp.fingerprints.hashed.HashedFingerprinter;
 import com.bioinception.chem.fp.fingerprints.interfaces.IFingerprinter;
 import com.google.common.collect.FluentIterable;
@@ -40,6 +41,7 @@ import java.text.DecimalFormat;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
@@ -48,8 +50,11 @@ import org.openscience.cdk.isomorphism.VentoFoggia;
 
 /**
  * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol new 2 1000
+ *
  * Test CDK default FP java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk
- * 2 1000 Test new FP with ring matcher java -jar dist/CDKHashedFingerprint.jar
+ * 2 1000
+ *
+ * Test new FP with ring matcher java -jar dist/CDKHashedFingerprint.jar
  * test/data/mol new 1 1000
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
@@ -62,7 +67,7 @@ public class BenchmarkHashedFingerprint extends Base {
     private static long TN;
     private static long HITS;
     private static final Map<String, Data> dataMap = new HashMap<String, Data>();
-    private static final org.openscience.cdk.fingerprint.IFingerprinter cdkFingerprint = new org.openscience.cdk.fingerprint.Fingerprinter(1024);
+    private static final org.openscience.cdk.fingerprint.IFingerprinter cdkFingerprint = new Fingerprinter(1024);
     private static final IFingerprinter fingerprint1 = new HashedFingerprinter(1024);
     private static final IFingerprinter fingerprint2 = new HashedBloomFingerprinter(1024);
 
@@ -146,8 +151,8 @@ public class BenchmarkHashedFingerprint extends Base {
             HITS = 0;
 
             long startTime = System.currentTimeMillis();
-            for (Data fragment : dataMap.values()) {
-                for (Data original : dataMap.values()) {
+            dataMap.values().forEach((Data fragment) -> {
+                dataMap.values().stream().map(original -> {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
@@ -155,7 +160,6 @@ public class BenchmarkHashedFingerprint extends Base {
                             VentoFoggia.findIdentical(original.getAtomContainer())
                                     .matchAll(fragment.getAtomContainer())).size();
                     boolean trueMatch = count_bond_match > 0;
-
                     if (FPMatch && trueMatch) {
                         TP++;
                     } else if (FPMatch && !trueMatch) {
@@ -165,9 +169,11 @@ public class BenchmarkHashedFingerprint extends Base {
                     } else if (!FPMatch && !trueMatch) {
                         TN++;
                     }
+                    return original;
+                }).forEachOrdered(_item -> {
                     HITS++;
-                }
-            }
+                });
+            });
 
             System.out.print(dataMap.size() + "*" + dataMap.size() + "\t\t");
             System.out.print(TP + "\t");
