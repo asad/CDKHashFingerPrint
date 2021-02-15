@@ -75,15 +75,15 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
  *
  * A fingerprint is generated for an AtomContainer with this code:
  * <pre>
- Molecule molecule = new Molecule();
- IFingerprinter fingerprinter = new ScaffoldHashedFingerprinter();
- IBitFingerprint fingerprint = fingerprinter.getBitFingerprint(molecule);
- fingerprint.size(); // returns 1024 by default
- fingerprint.length(); // returns the highest set bit
- </pre>
+ * Molecule molecule = new Molecule();
+ * IFingerprinter fingerprinter = new ScaffoldHashedFingerprinter();
+ * IBitFingerprint fingerprint = fingerprinter.getBitFingerprint(molecule);
+ * fingerprint.size(); // returns 1024 by default
+ * fingerprint.length(); // returns the highest set bit
+ * </pre>
  * <p>
  *
- * The FingerPrinter assumes that hydrogens are explicitly given! Furthermore,
+ * The FingerPrinter assumes that hydrogen's are explicitly given! Furthermore,
  * if pseudo atoms or atoms with malformed symbols are present, their atomic
  * number is taken as one more than the last element currently supported in
  * {@link org.openscience.cdk.tools.periodictable.PeriodicTable}.
