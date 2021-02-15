@@ -27,7 +27,6 @@ package com.bioinception.chem.fp.fingerprints.bi;
 import static com.bioinception.chem.fp.fingerprints.bi.PathEncoder.encodePaths;
 import static com.bioinception.chem.fp.fingerprints.bi.PathEncoder.isPseudoAtom;
 import static com.bioinception.chem.fp.fingerprints.helper.RandomNumber.generateMersenneTwisterRandomNumber;
-import com.bioinception.chem.fp.fingerprints.interfaces.IFingerprinter;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -48,6 +47,7 @@ import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.exception.Intractable;
+import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.graph.CycleFinder;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IRingSet;
@@ -177,7 +177,6 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
      * perception
      * @return A {@link BitSet} representing the fingerprint
      */
-    @Override
     public IBitFingerprint getBitFingerprint(IAtomContainer container, AllRingsFinder ringFinder) throws CDKException {
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
@@ -289,15 +288,26 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         throw new UnsupportedOperationException();
     }
 
+    /**
+     *
+     * @param limit
+     */
     public void setPathLimit(int limit) {
         this.pathLimit = limit;
     }
 
+    /**
+     *
+     * @param value
+     */
     public void setHashPseudoAtoms(boolean value) {
         this.hashPseudoAtoms = value;
     }
 
-    @Override
+    /**
+     *
+     * @return
+     */
     public int getSearchDepth() {
         return searchDepth;
     }
@@ -319,26 +329,6 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
             }
         }
         return false;
-    }
-
-    @Override
-    public boolean isRespectFormalCharges() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isRespectRingMatches() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setRespectFormalCharges(boolean respectFormalCharges) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setRespectRingMatches(boolean respectRingMatches) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
