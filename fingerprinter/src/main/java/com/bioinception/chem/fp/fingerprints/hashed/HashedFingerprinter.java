@@ -75,7 +75,7 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  * </pre>
  * <p>
  *
- * The FingerPrinter assumes that hydrogens are explicitly given!
+ * The FingerPrinter assumes that hydrogen's are explicitly given!
  *
  * <font color="#FF0000">Warning: The aromaticity detection for this
  * FingerPrinter relies on AllRingsFinder, which is known to take very long for
@@ -200,12 +200,12 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
     /**
      * Generates a fingerprint of the default fingerprintLength for the given
      * AtomContainer.
+     *
      * @TestMethod("testGetFingerprint_IAtomContainer")
      * @param container The AtomContainer for which a Fingerprint is generated
      * @return
      * @throws CDKException
      */
-   
     @Override
     public IBitFingerprint getBitFingerprint(IAtomContainer container)
             throws CDKException {

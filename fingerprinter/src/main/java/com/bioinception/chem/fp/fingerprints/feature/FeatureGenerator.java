@@ -58,10 +58,11 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * A features is generated for an AtomContainer with this code:
  * <pre>
  *   Map<IAtom, String> atomInvariants = FeatureGenerator.getAtomInvariants(container);
- * </pre></p>
+ * </pre>
+ * </p>
  *
  * <p>
- * The FeatureGenerator assumes that hydrogens are explicitly given!
+ * The FeatureGenerator assumes that hydrogen's are explicitly given!
  * Furthermore, if pseudo atoms or atoms with malformed symbols are present,
  * their atomic number is taken as one more than the last element currently
  * supported in {@link PeriodicTable}.
@@ -139,9 +140,9 @@ public class FeatureGenerator {
 
         // Convert sorted map back to a Map
         Map<IAtom, String> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<IAtom, String> entry : list) {
+        list.forEach(entry -> {
             sortedMap.put(entry.getKey(), entry.getValue());
-        }
+        });
         return sortedMap;
     }
 
@@ -163,6 +164,7 @@ public class FeatureGenerator {
         Map<IAtom, String> sortByValue = sortByValue(map);
         return sortByValue;
     }
+
     /*
      The first seven feature we extract are as follows: 
      (i) number of non-hydrogen connections, 
@@ -185,7 +187,7 @@ public class FeatureGenerator {
 //        //(0) Symbol of the atom
 //        String symbol = a.getSymbol();
 //        feature.add("[" + symbol + "]");
-        
+
         //(i) number of non-hydrogen connections
         int nonHConnections = getNonHydrogenConnections(ac.getConnectedAtomsList(a));
         feature.add(nonHConnections + "");
@@ -195,15 +197,15 @@ public class FeatureGenerator {
         feature.add(nonHBond + "");
         //System.out.println("feature " + feature);
         //(iii) atomic numbers
-        int atomicNumber
-                = Objects.equals(a.getAtomicNumber(), CDKConstants.UNSET)
-                        ? 0 : a.getAtomicNumber();
+        int atomicNumber;
+        atomicNumber = Objects.equals(a.getAtomicNumber(), CDKConstants.UNSET)
+                ? 0 : a.getAtomicNumber();
         int atomNumber = atomicNumber;
         feature.add(atomNumber + "");
         //System.out.println("feature " + feature);
         //(iv) sign of charge
-        Double charge
-                = Objects.equals(a.getCharge(), CDKConstants.UNSET) ? 0.0 : a.getCharge();
+        Double charge;
+        charge = Objects.equals(a.getCharge(), CDKConstants.UNSET) ? 0.0 : a.getCharge();
         // Sign of charge
         if (charge < 0) {
             feature.add(1 + "");
@@ -215,7 +217,7 @@ public class FeatureGenerator {
         int absCharge
                 = (int) Math.abs(
                         (Objects.equals(a.getFormalCharge(), CDKConstants.UNSET)
-                                ? 0.0 : a.getFormalCharge()));
+                        ? 0.0 : a.getFormalCharge()));
         feature.add(absCharge + "");
         //System.out.println("feature " + feature);
         //(vi) number of connected hydrogens
@@ -223,18 +225,18 @@ public class FeatureGenerator {
         feature.add(countHydrogens + "");
         //(vii) atomic numbers of neighboring atoms
         List<Integer> neighboringAtomicNumbers = getNeighboringAtomicNumbers(ac.getConnectedAtomsList(a));
-        for (Integer i : neighboringAtomicNumbers) {
+        neighboringAtomicNumbers.forEach(i -> {
             feature.add(i + "");
-        }
+        });
         /*
          All the feature are concatenated and 
          then rank ordered using the natural ordering for strings
          */
         Collections.sort(feature, new NaturalOrderComparator());
         StringBuilder sb = new StringBuilder();
-        for (String s : feature) {
+        feature.forEach(s -> {
             sb.append(s);
-        }
+        });
         return sb.toString();
     }
 
@@ -256,13 +258,15 @@ public class FeatureGenerator {
      */
     private static List<Integer> getNeighboringAtomicNumbers(List<IAtom> connectedAtomsList) {
         List<Integer> atomicNumbersList = new ArrayList<>();
-        for (IAtom a : connectedAtomsList) {
+        connectedAtomsList.stream().map(a -> {
             if (a.getAtomicNumber() == null) {
                 throw new IllegalArgumentException("an atom had with unknown (null) atomic number");
             }
-//            System.out.println("getAtomicNumber " + a.getAtomicNumber());
+            return a;
+        }).forEachOrdered(a -> {
+            //            System.out.println("getAtomicNumber " + a.getAtomicNumber());
             atomicNumbersList.add(a.getAtomicNumber());
-        }
+        });
         return atomicNumbersList;
     }
 
@@ -271,14 +275,10 @@ public class FeatureGenerator {
      */
     private static int getNonHydrogenConnections(List<IAtom> connectedAtomsList) {
         int i = 0;
-        for (IAtom a : connectedAtomsList) {
-            if (Elements.HYDROGEN.getSymbol().equals(a.getSymbol())) {
-                continue;
-            }
-            i++;
-        }
+        i = connectedAtomsList.stream().filter(a -> !(Elements.HYDROGEN.getSymbol().equals(a.getSymbol()))).map(_item -> 1).reduce(i, Integer::sum);
         return i;
     }
+
     /*
      @returns number of hydrogen connections
      */

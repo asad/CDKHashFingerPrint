@@ -35,7 +35,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 public class RandomNumber {
 
     /**
-     * Mersenne Twister Random Number for a hashcode within a range between 0 to maximum
+     * Mersenne Twister Random Number for a hashcode within a range between 0 to
+     * maximum
      *
      * @param maximum
      * @param hashCode

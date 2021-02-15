@@ -19,25 +19,28 @@ import org.openscience.cdk.ringsearch.AllRingsFinder;
 public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerprinter {
 
     /**
-     * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
+     * Generates a fingerprint of the default fingerprintLength for the given
+     * AtomContainer.
+     *
      * @TestMethod(value = "testGetFingerprint_IAtomContainer")
      * @param container The AtomContainer for which a Fingerprint is generated
      * @param ringFinder An instance of
      * {@link org.openscience.cdk.ringsearch.AllRingsFinder}
-     * @exception CDKException if there is a timeout in ring or aromaticity perception
+     * @exception CDKException if there is a timeout in ring or aromaticity
+     * perception
      * @return A {@link BitSet} representing the fingerprint
      */
-    
     IBitFingerprint getBitFingerprint(IAtomContainer container, AllRingsFinder ringFinder) throws CDKException;
 
     /**
-     * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
+     * Generates a fingerprint of the default fingerprintLength for the given
+     * AtomContainer.
+     *
      * @TestMethod(value = "testGetFingerprint_IAtomContainer")
      * @param container The AtomContainer for which a Fingerprint is generated
      * @return
      * @throws CDKException
      */
-    
     @Override
     IBitFingerprint getBitFingerprint(IAtomContainer container) throws CDKException;
 
@@ -48,15 +51,14 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
     Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException;
 
     /**
-     *@TestMethod(value = "testGetSearchDepth")
+     * @TestMethod(value = "testGetSearchDepth")
      * @return
      */
-    
     int getSearchDepth();
 
     /*
     @TestMethod(value = "testGetSize")
-    */
+     */
     @Override
     int getSize();
 
@@ -80,7 +82,8 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
     /**
      * Ring matches are allowed and non-ring to ring matches are discarded
      *
-     * @param respectRingMatches respect the ring-to-ring matches and discard non-ring to ring matches
+     * @param respectRingMatches respect the ring-to-ring matches and discard
+     * non-ring to ring matches
      */
     void setRespectRingMatches(boolean respectRingMatches);
 }
