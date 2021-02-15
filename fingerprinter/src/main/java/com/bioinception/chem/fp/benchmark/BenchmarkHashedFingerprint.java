@@ -79,6 +79,13 @@ public class BenchmarkHashedFingerprint extends Base {
      * @throws IOException
      */
     public static void main(String[] args) throws FileNotFoundException, CDKException, IOException {
+        
+        System.out.println("Command args " +  args);
+        if (args.length==0){
+            System.out.println("java -jar fingerprinter-1.0-SNAPSHOT.jar mol_dir cdk 1 1000");
+            System.exit(0);
+        }
+        
         String s = System.getProperty("user.home") + File.separator + args[0];
         File directory = new File(s);
         int expectedDataSize = 100;
