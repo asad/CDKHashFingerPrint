@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.isomorphism.AtomMatcher;
 import org.openscience.cdk.isomorphism.BondMatcher;
@@ -72,11 +71,11 @@ public class SubgraphTest {
         AtomMatcher atommatcher = AtomMatcher.forAny();
 
         int count_bond_match = FluentIterable.from(
-                VentoFoggia.findIdentical(moleculeT,
+                VentoFoggia.findSubstructure(moleculeT,
                         atommatcher, bondmatcher)
                         .matchAll(moleculeQ)).size();
         int count_match = FluentIterable.from(
-                VentoFoggia.findIdentical(moleculeT)
+                VentoFoggia.findSubstructure(moleculeT)
                         .matchAll(moleculeQ)).size();
         boolean trueMatch = count_bond_match > 0;
         boolean match = count_match > 0;
@@ -117,11 +116,11 @@ public class SubgraphTest {
         AtomMatcher atommatcher = AtomMatcher.forAny();
 
         int count_bond_match = FluentIterable.from(
-                VentoFoggia.findIdentical(moleculeT,
+                VentoFoggia.findSubstructure(moleculeT,
                         atommatcher, bondmatcher)
                         .matchAll(moleculeQ)).size();
         int count_match = FluentIterable.from(
-                VentoFoggia.findIdentical(moleculeT)
+                VentoFoggia.findSubstructure(moleculeT)
                         .matchAll(moleculeQ)).size();
         boolean trueMatch = count_bond_match > 0;
         boolean match = count_match > 0;
@@ -129,7 +128,7 @@ public class SubgraphTest {
         System.out.println("isSubset match bonds too: " + trueMatch);
         System.out.println("isSubset: " + match);
 
-        Assert.assertEquals(false, trueMatch);
-        Assert.assertEquals(false, match);
+        Assert.assertEquals(true, trueMatch);
+        Assert.assertEquals(true, match);
     }
 }

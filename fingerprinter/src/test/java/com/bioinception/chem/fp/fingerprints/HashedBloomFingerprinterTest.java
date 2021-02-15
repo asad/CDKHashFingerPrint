@@ -46,7 +46,7 @@ public class HashedBloomFingerprinterTest {
 
     /**
      * Test of HashedBloomFingerprinter method
-     *
+     * @bug
      * @throws InvalidSmilesException
      * @throws CDKException
      */
@@ -69,7 +69,7 @@ public class HashedBloomFingerprinterTest {
         System.out.println("fpT " + fingerprintT.toString());
         System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
 
-        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+        Assert.assertTrue(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
     }
 
     /**
