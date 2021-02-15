@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 import net.sf.jniinchi.INCHI_RET;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.AtomContainer;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
+import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -78,11 +78,11 @@ public class Base {
     /**
      *
      * @param dir
-     * @param cutoff 
+     * @param cutoff
      * @return
      * @throws FileNotFoundException
      * @throws CDKException
-     * @throws IOException  
+     * @throws IOException
      */
     public static Map<String, IAtomContainer> readMDLMolecules(File dir, int cutoff) throws FileNotFoundException, CDKException, IOException {
         System.out.println("\nReading Files: ");
@@ -118,12 +118,15 @@ public class Base {
     }
 
     /**
-     * Prepare the target molecule for analysis. <p/> We perform ring perception and aromaticity detection and set up
-     * the appropriate properties. Right now, this function is called each time we need to do a query and this is
-     * inefficient.
+     * Prepare the target molecule for analysis.
+     * <p/>
+     * We perform ring perception and aromaticity detection and set up the
+     * appropriate properties. Right now, this function is called each time we
+     * need to do a query and this is inefficient.
      *
-     * @throws CDKException if there is a problem in ring perception or aromaticity detection, which is usually related
-     *                      to a timeout in the ring finding code.
+     * @throws CDKException if there is a problem in ring perception or
+     * aromaticity detection, which is usually related to a timeout in the ring
+     * finding code.
      */
     private static Integer initializeMolecule(IAtomContainer atomContainer) throws CDKException {
         Integer hashRings = 0;
@@ -171,7 +174,6 @@ public class Base {
         valencesTable.put("Co", 2);
 
         // do all ring perception
-
         AllRingsFinder ringFinder = null;
         if (ringFinder == null) {
             ringFinder = new AllRingsFinder();
@@ -263,7 +265,7 @@ public class Base {
         // check for atomaticity
         try {
             AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
-            CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
+            Aromaticity.cdkLegacy().apply(atomContainer);
         } catch (CDKException e) {
             throw new CDKException(e.toString(), e);
         }
