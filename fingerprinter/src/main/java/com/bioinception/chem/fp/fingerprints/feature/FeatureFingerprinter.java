@@ -72,7 +72,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * </pre></p>
  *
  * <p>
- * The FingerPrinter assumes that hydrogens are explicitly given! Furthermore,
+ * The FingerPrinter assumes that hydrogen's are explicitly given! Furthermore,
  * if pseudo atoms or atoms with malformed symbols are present, their atomic
  * number is taken as one more than the last element currently supported in
  * {@link PeriodicTable}.
@@ -198,24 +198,24 @@ public class FeatureFingerprinter implements IFingerprinter {
              */
             Map<IAtom, String> atomInvariantsMap = FeatureGenerator.getAtomInvariants(clonedContainer);
             /*
-             Store all the atoms
+            Store all the atoms
              */
-            for (IAtom a : atomInvariantsMap.keySet()) {
-                int hashCode = a.getSymbol().hashCode();
-                long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
+            atomInvariantsMap.keySet().stream().map(a -> a.getSymbol().hashCode()).map(hashCode -> hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31))).forEachOrdered(b -> {
                 bitSet.set((int) (b % fingerprintSize));
-            }
+            });
             /*
-             Store all the atom invariants
+            Store all the atom invariants
              */
-            for (String invariant : atomInvariantsMap.values()) {
+            atomInvariantsMap.values().stream().map(invariant -> {
                 int hashCode = invariant.hashCode();
                 if (DEBUG) {
                     System.out.println("invariant " + invariant);
                 }
                 long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
+                return b;
+            }).forEachOrdered(b -> {
                 bitSet.set((int) (b % fingerprintSize));
-            }
+            });
 
             IRingSet rings = new RingSet();
             // sets SSSR information
@@ -242,9 +242,9 @@ public class FeatureFingerprinter implements IFingerprinter {
             }
             Collections.sort(list, new NaturalOrderComparator());
             StringBuilder s = new StringBuilder();
-            for (String f : list) {
+            list.forEach(f -> {
                 s.append(f);
-            }
+            });
             s.trimToSize();
             String pattern = s.toString();
             if (ringMap.containsKey(pattern)) {
@@ -255,14 +255,14 @@ public class FeatureFingerprinter implements IFingerprinter {
             }
         }
 
-        for (String p : ringMap.keySet()) {
+        ringMap.keySet().forEach(p -> {
             int counter = ringMap.get(p);
             while (counter-- > 0) {
                 int hashCode = p.concat(String.valueOf(counter)).hashCode();
                 long b = hashCode >= 0 ? hashCode : ((hashCode & 0x7FFFFFFF) | (1L << 31));
                 bitSet.set((int) (b % fingerprintSize));
             }
-        }
+        });
     }
 
     @Override
