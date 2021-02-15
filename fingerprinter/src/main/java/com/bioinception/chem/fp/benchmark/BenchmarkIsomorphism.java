@@ -129,11 +129,11 @@ public class BenchmarkIsomorphism extends Base {
             dataMap.values().forEach(fragment -> {
                 dataMap.values().stream().map(original -> {
                     int count_bond_match = FluentIterable.from(
-                            VentoFoggia.findIdentical(original.getAtomContainer(),
+                            VentoFoggia.findSubstructure(original.getAtomContainer(),
                                     atommatcher, bondmatcher)
                                     .matchAll(fragment.getAtomContainer())).size();
                     int count_match = FluentIterable.from(
-                            VentoFoggia.findIdentical(original.getAtomContainer())
+                            VentoFoggia.findSubstructure(original.getAtomContainer())
                                     .matchAll(fragment.getAtomContainer())).size();
                     boolean trueMatch = count_bond_match > 0;
                     boolean bondMatch = count_match > 0;

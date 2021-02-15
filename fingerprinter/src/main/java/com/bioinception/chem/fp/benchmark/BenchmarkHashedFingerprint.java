@@ -28,6 +28,7 @@ package com.bioinception.chem.fp.benchmark;
 import com.bioinception.chem.fp.benchmark.helper.Base;
 import static com.bioinception.chem.fp.benchmark.helper.Base.readMDLMolecules;
 import com.bioinception.chem.fp.benchmark.helper.Data;
+import com.bioinception.chem.fp.fingerprints.bi.ScaffoldHashedFingerprinter;
 import com.bioinception.chem.fp.fingerprints.cdk.Fingerprinter;
 import com.bioinception.chem.fp.fingerprints.hashed.HashedBloomFingerprinter;
 import com.bioinception.chem.fp.fingerprints.hashed.HashedFingerprinter;
@@ -41,7 +42,6 @@ import java.text.DecimalFormat;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
@@ -68,6 +68,7 @@ public class BenchmarkHashedFingerprint extends Base {
     private static long HITS;
     private static final Map<String, Data> dataMap = new HashMap<String, Data>();
     private static final org.openscience.cdk.fingerprint.IFingerprinter cdkFingerprint = new Fingerprinter(1024);
+    private static final org.openscience.cdk.fingerprint.IFingerprinter scaffoldFingerprint = new ScaffoldHashedFingerprinter(1024);
     private static final IFingerprinter fingerprint1 = new HashedFingerprinter(1024);
     private static final IFingerprinter fingerprint2 = new HashedBloomFingerprinter(1024);
 
@@ -133,6 +134,9 @@ public class BenchmarkHashedFingerprint extends Base {
                     } else if (args.length > 1 && args[1].equals("hashbloom")) {
                         hashedFingerPrint = getHashedBloomFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
+                    } else if (args.length > 1 && args[1].equals("scaffold")) {
+                        hashedFingerPrint = getScaffoldFingerprint(ac).asBitSet();
+                        dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -157,7 +161,7 @@ public class BenchmarkHashedFingerprint extends Base {
                             original.getFingerprint(),
                             fragment.getFingerprint());
                     int count_bond_match = FluentIterable.from(
-                            VentoFoggia.findIdentical(original.getAtomContainer())
+                            VentoFoggia.findSubstructure(original.getAtomContainer())
                                     .matchAll(fragment.getAtomContainer())).size();
                     boolean trueMatch = count_bond_match > 0;
                     if (FPMatch && trueMatch) {
@@ -215,5 +219,9 @@ public class BenchmarkHashedFingerprint extends Base {
 
     private static IBitFingerprint getHashedBloomFingerprint(IAtomContainer ac) throws CDKException {
         return fingerprint2.getBitFingerprint(ac);
+    }
+
+    private static IBitFingerprint getScaffoldFingerprint(IAtomContainer ac) throws CDKException {
+        return scaffoldFingerprint.getBitFingerprint(ac);
     }
 }
