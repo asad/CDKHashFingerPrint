@@ -51,30 +51,4 @@ CASES:		TP:	FP:	TN:	FN:	ACCURACY:	TPR:	FPR:	Time (mins):
 960*960		1119	19360	892819	8302	0.970		0.119	0.022	0.41
 
 
-
-Results:
-
-The improved hashed fingerprinter has better "Accuracy" 
-and ~30-40% lesser false positives (FPs) than the original version!
-
-/* Test new FP with ring matcher */
-
-java -jar BenchmarkHashedFingerprinter.jar test/data/mol hash  1  2000
-
-------------------------------------------------------------------------------
-CASES:		TP:	FP:	TN:	FN:	ACCURACY:   TPR:    FPR:	Time (mins): 
-------------------------------------------------------------------------------
-200*200		629	144	39227	0	0.996       1.000   0.004	0.1
-400*400		2381	842	156777	0	0.995       1.000   0.005	0.34
-600*600		4882	2161	352957	0	0.994       1.000   0.006	0.71
-800*800		8484	4477	627039	0	0.993       1.000   0.007	1.2
-1000*1000	12710	7977	979313	0	0.992       1.000   0.008	1.97
-1200*1200	17070	11429	1411501	0	0.992       1.000   0.008	2.82
-
-The improved hashed fingerprinter with ring matcher has better "Accuracy" 
-and ~40% lesser false positives (FPs) than the original version!
-
-/* Test new FP with bloom filter and ring matcher */
-
-java -jar BenchmarkHashedFingerprinter.jar test/data/mol hashbloom  1  2000
-
+Note: New Scaffold fingerprinter reduces number of False Positives (FP) - High Accuracy
