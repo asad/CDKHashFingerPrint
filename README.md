@@ -17,7 +17,7 @@ http://chembioinfo.com/2011/10/30/revisiting-molecular-hashed-fingerprints/
  java -jar target/fingerprinter-1.0-SNAPSHOT-jar-with-dependencies.jar mol scaffold 250
 ````   
 
-## Improved CDK HashedFingerprinter class with 1024 size FP ##
+**Improved CDK HashedFingerprinter class with 1024 size FP**
 
 
 CASES |	TP	| FP |	TN	| FN	|	ACCURACY	|	TPR	|	FPR	|	Time (mins)
@@ -39,7 +39,7 @@ CASES |	TP	| FP |	TN	| FN	|	ACCURACY	|	TPR	|	FPR	|	Time (mins)
  java -jar target/fingerprinter-1.0-SNAPSHOT-jar-with-dependencies.jar mol cdk 250
 ````
 
-## CDK Default Fingerprinter class with 1024 size FP ##
+**CDK Default Fingerprinter class with 1024 size FP**
 
 
 CASES |	TP	| FP |	TN	| FN	|	ACCURACY	|	TPR	|	FPR	|	Time (mins)
