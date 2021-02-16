@@ -217,6 +217,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         if (rings != null) {
             setRingBits(bitSet0, rings, size0);
         }
+//        System.out.println("BitSet - 0 " + bitSet0);
 
         /*
          * Encode Rings Path
@@ -230,7 +231,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
             }
         }
 
-//        System.out.println("BitSet - ring " + bitSet0);
+//         System.out.println("BitSet - 1 " + bitSet1);
 
         /*
          * Encode Atoms
@@ -238,14 +239,14 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         int size2 = 128;
         BitSet bitSet2 = new BitSet(size2);
         encodePaths(container, 0, 3, bitSet2, size2, pathLimit, hashPseudoAtoms);
-//        System.out.println("BitSet - 1 " + bitSet1);
+//        System.out.println("BitSet - 2 " + bitSet2);
         /*
          * Encode Paths 1 to 5 length
          */
         int size3 = 256;
         BitSet bitSet3 = new BitSet(size3);
         encodePaths(container, 0, 5, bitSet3, size3, pathLimit, hashPseudoAtoms);
-//        System.out.println("BitSet - 2 " + bitSet2);
+//        System.out.println("BitSet - 3 " + bitSet3);
 
         /*
          * Encode Paths 1 to search depth length
@@ -253,7 +254,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         int size4 = size - (size3 + size2 + size1 + size0);
         BitSet bitSet4 = new BitSet(size4);
         encodePaths(container, 0, searchDepth, bitSet4, size4, pathLimit, hashPseudoAtoms);
-//        System.out.println("BitSet - 3 " + bitSet3);
+//        System.out.println("BitSet - 4 " + bitSet4);
 
         /*
          * Set all bits
