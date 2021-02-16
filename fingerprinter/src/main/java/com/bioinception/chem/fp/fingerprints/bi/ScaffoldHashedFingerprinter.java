@@ -181,13 +181,6 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
-        if (!hasPseudoAtom(container.atoms())) {
-            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-            Aromaticity.cdkLegacy().apply(container);
-        }
-        long after = System.currentTimeMillis();
-        logger.debug("time for aromaticity calculation: " + (after - before) + " milliseconds");
-        logger.debug("Finished Aromaticity Detection");
 
         // all cycles or relevant or essential
 //        CycleFinder cf = Cycles.or(Cycles.all(),
@@ -206,6 +199,14 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
             // ignore error - edge short cycles do not check tractability
         }
 
+        if (!hasPseudoAtom(container.atoms())) {
+            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
+            Aromaticity.cdkLegacy().apply(container);
+        }
+        long after = System.currentTimeMillis();
+        logger.debug("time for aromaticity calculation: " + (after - before) + " milliseconds");
+        logger.debug("Finished Aromaticity Detection");
+
         /*
          * Encode Rings
          */
@@ -214,29 +215,42 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         if (rings != null) {
             setRingBits(bitSet0, rings, size0);
         }
+
+        /*
+         * Encode Rings Path
+         */
+        int size1 = 128;
+        BitSet bitSet1 = new BitSet(size1);
+        if (rings != null) {
+            for (int i = 0; i < rings.getAtomContainerCount(); i++) {
+                IAtomContainer ring = rings.getAtomContainer(i);
+                encodePaths(ring, 0, searchDepth, bitSet1, size1, pathLimit, hashPseudoAtoms);
+            }
+        }
+
 //        System.out.println("BitSet - ring " + bitSet0);
 
         /*
          * Encode Atoms
          */
-        int size1 = 128;
-        BitSet bitSet1 = new BitSet(size1);
-        encodePaths(container, 0, 3, bitSet1, size1, pathLimit, hashPseudoAtoms);
+        int size2 = 128;
+        BitSet bitSet2 = new BitSet(size2);
+        encodePaths(container, 0, 3, bitSet2, size2, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 1 " + bitSet1);
         /*
          * Encode Paths 1 to 3 length
          */
-        int size2 = 256;
-        BitSet bitSet2 = new BitSet(size2);
-        encodePaths(container, 0, 5, bitSet2, size2, pathLimit, hashPseudoAtoms);
+        int size3 = 256;
+        BitSet bitSet3 = new BitSet(size3);
+        encodePaths(container, 0, 5, bitSet3, size3, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 2 " + bitSet2);
 
         /*
          * Encode Paths 3 and more length
          */
-        int size3 = size - (size2 + size1 + size0);
-        BitSet bitSet3 = new BitSet(size3);
-        encodePaths(container, 0, searchDepth, bitSet3, size3, pathLimit, hashPseudoAtoms);
+        int size4 = size - (size3 + size2 + size1 + size0);
+        BitSet bitSet4 = new BitSet(size4);
+        encodePaths(container, 0, searchDepth, bitSet4, size4, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 3 " + bitSet3);
 
         /*
@@ -247,6 +261,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         BitSet concatenate_vectors = concatenate_vectors(bitSet1, bitSet0);
         concatenate_vectors = concatenate_vectors(bitSet2, concatenate_vectors);
         concatenate_vectors = concatenate_vectors(bitSet3, concatenate_vectors);
+        concatenate_vectors = concatenate_vectors(bitSet4, concatenate_vectors);
 //        System.out.println("Concat BitSet " + concatenate_vectors);
 
         bitSet.or(concatenate_vectors);

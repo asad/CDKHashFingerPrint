@@ -35,11 +35,14 @@ import java.util.logging.Logger;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.RingSet;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.Intractable;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.Fingerprinter;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.graph.CycleFinder;
+import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IRingSet;
@@ -217,12 +220,18 @@ public class FeatureFingerprinter implements IFingerprinter {
                 bitSet.set((int) (b % fingerprintSize));
             });
 
-            IRingSet rings = new RingSet();
-            // sets SSSR information
-            SSSRFinder finder = new SSSRFinder(container);
-            IRingSet sssr = finder.findEssentialRings();
-            rings.add(sssr);
-            RingSetManipulator.sort(rings);
+            //minimal cycle basis
+            CycleFinder cf = Cycles.mcb();
+
+            IRingSet rings = null;
+            try {
+                Cycles cycles = cf.find(container);
+                rings = cycles.toRingSet();
+                RingSetManipulator.markAromaticRings(rings);
+                RingSetManipulator.sort(rings);
+            } catch (Intractable e) {
+                // ignore error - edge short cycles do not check tractability
+            }
             setRingBits(bitSet, rings);
 
         } catch (CloneNotSupportedException exception) {
