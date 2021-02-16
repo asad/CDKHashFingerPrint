@@ -48,10 +48,13 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import java.util.*;
 import org.openscience.cdk.aromaticity.Aromaticity;
+import org.openscience.cdk.exception.Intractable;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.graph.ConnectivityChecker;
+import org.openscience.cdk.graph.CycleFinder;
+import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 /**
@@ -258,15 +261,26 @@ public class HashedFingerprinter extends RandomNumber implements IFingerprinter 
         }
 
         if (isRespectRingMatches()) {
-            SSSRFinder finder = new SSSRFinder(container);
-            IRingSet sssr = finder.findEssentialRings();
-            RingSetManipulator.sort(sssr);
-            int ringCounter = sssr.getAtomContainerCount();
-            for (IAtomContainer ring : sssr.atomContainers()) {
-                int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
-                paths.add(patternIndex, toHashCode);
-                patternIndex++;
-                ringCounter--;
+//            SSSRFinder finder = new SSSRFinder(container);
+//            IRingSet sssr = finder.findEssentialRings();
+//            RingSetManipulator.sort(sssr);
+            // all cycles or relevant or essential
+            CycleFinder cf = Cycles.mcb();
+            IRingSet sssr = null;
+            try {
+                Cycles cycles = cf.find(container);
+                sssr = cycles.toRingSet();
+                RingSetManipulator.markAromaticRings(sssr);
+                RingSetManipulator.sort(sssr);
+                int ringCounter = sssr.getAtomContainerCount();
+                for (IAtomContainer ring : sssr.atomContainers()) {
+                    int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
+                    paths.add(patternIndex, toHashCode);
+                    patternIndex++;
+                    ringCounter--;
+                }
+            } catch (Intractable e) {
+                // ignore error - edge short cycles do not check tractability
             }
         }
 
