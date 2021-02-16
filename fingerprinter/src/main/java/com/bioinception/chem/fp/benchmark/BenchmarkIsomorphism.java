@@ -99,10 +99,14 @@ public class BenchmarkIsomorphism extends Base {
         System.out.println("Time (mins): ");
         System.out.print("------------------------------------------------------------------------------\n");
 
-        for (int k = 0; k < molecules.size(); k += interval) {
+        for (int k = 0; k < molecules.size();) {
             int counter = 1;
+            k += interval;
+//            System.out.println("K: " + k + ", counter: " + counter + ", interval: " + interval);
+
             for (String inchiKey : molecules.keySet()) {
                 IAtomContainer ac = molecules.get(inchiKey);
+//                System.out.println("counter: " + counter + ", inchiKey " + inchiKey);
                 if (dataMap.containsKey(inchiKey)) {
                     continue;
                 }
@@ -110,10 +114,10 @@ public class BenchmarkIsomorphism extends Base {
                     dataMap.put(inchiKey, new Data(ac));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.err.println("error in generating graph: " + ac.getID());
+                    System.err.println("error in generating fp: " + ac.getID());
                 }
-
-                if (counter++ == interval) {
+                counter++;
+                if (k < counter) {
                     break;
                 }
             }
@@ -124,7 +128,7 @@ public class BenchmarkIsomorphism extends Base {
             TN = 0;
             HITS = 0;
             BondMatcher bondmatcher = BondMatcher.forOrder();
-            AtomMatcher atommatcher = AtomMatcher.forAny();
+            AtomMatcher atommatcher = AtomMatcher.forElement();
 
             long startTime = System.currentTimeMillis();
             dataMap.values().forEach(fragment -> {

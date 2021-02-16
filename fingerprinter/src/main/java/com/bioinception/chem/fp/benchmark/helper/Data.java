@@ -34,11 +34,27 @@ import org.openscience.cdk.interfaces.IAtomContainer;
  */
 public class Data {
 
+    /**
+     * @return the fpName
+     */
+    public String getFPName() {
+        return fpName;
+    }
+
+    /**
+     * @param fpName the fpName to set
+     */
+    public void setFPName(String fpName) {
+        this.fpName = fpName;
+    }
+
+    private String fpName;
     private BitSet fingerprint;
     private final IAtomContainer atomContainer;
 
     /**
      * Store the fingerprint and its structure
+     *
      * @param fingerprint
      * @param atomContainer
      */
@@ -49,6 +65,7 @@ public class Data {
 
     /**
      * Store the fingerprint and its structure
+     *
      * @param atomContainer
      */
     public Data(IAtomContainer atomContainer) {

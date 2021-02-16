@@ -122,34 +122,33 @@ public class BenchmarkHashedFingerprint extends Base {
         fingerprint1.setRespectRingMatches(true);
         fingerprint2.setRespectRingMatches(true);
 
-        for (int k = 0; k < molecules.size(); k += interval) {
+        for (int k = 0; k < molecules.size();) {
             int counter = 1;
+            k += interval;
+//            System.out.println("K: " + k + ", counter: " + counter + ", interval: " + interval);
+
             for (String inchiKey : molecules.keySet()) {
                 IAtomContainer ac = molecules.get(inchiKey);
+//                System.out.println("counter: " + counter + ", inchiKey " + inchiKey);
                 if (dataMap.containsKey(inchiKey)) {
                     continue;
                 }
                 try {
-                    BitSet hashedFingerPrint = null;
+                    BitSet hashedFingerPrint;
                     if (args.length >= 2 && args[1].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac).asBitSet();
-                        dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length >= 2 && args[1].equals("hash")) {
-                        hashedFingerPrint = getHashedFingerprint(ac).asBitSet();
-                        dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length >= 2 && args[1].equals("hashbloom")) {
-                        hashedFingerPrint = getHashedBloomFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     } else if (args.length >= 2 && args[1].equals("scaffold")) {
                         hashedFingerPrint = getScaffoldFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.err.println("error in generating fp: " + ac.getID());
                 }
-
-                if (counter++ == interval) {
+                counter++;
+                if (k < counter) {
                     break;
                 }
             }
@@ -178,8 +177,8 @@ public class BenchmarkHashedFingerprint extends Base {
                         FP++;
                     } else if (!FPMatch && trueMatch) {
                         FN++;
-                        System.out.println("fn " + original.getAtomContainer().getID()
-                                + "," + fragment.getAtomContainer().getID());
+//                        System.out.println("fn " + original.getAtomContainer().getID()
+//                                + "," + fragment.getAtomContainer().getID());
                     } else if (!FPMatch && !trueMatch) {
                         TN++;
                     }
@@ -198,8 +197,13 @@ public class BenchmarkHashedFingerprint extends Base {
             System.out.print(getTPR() + "\t");
             System.out.print(getFPR() + "\t");
             System.out.println(getElapsedTime(startTime));
+            /*
+             * break the loop
+             */
+            if (expectedDataSize == dataMap.size()) {
+                break;
+            }
         }
-
     }
 
     private static BigDecimal getFPR() {
