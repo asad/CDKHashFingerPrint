@@ -35,7 +35,7 @@ CASES:		TP:	FP:	TN:	FN:	ACCURACY:	TPR:	FPR:	Time (mins):
 /* Test CDK default FP */
  
 ```
-java -jar target/fingerprinter-1.0-SNAPSHOT-jar-with-dependencies.jar mol cdk 2000
+java -jar target/fingerprinter-1.0-SNAPSHOT-jar-with-dependencies.jar mol cdk 250
 ```
 ***************************************
 CDK Default Fingerprinter class with 1024 size FP
