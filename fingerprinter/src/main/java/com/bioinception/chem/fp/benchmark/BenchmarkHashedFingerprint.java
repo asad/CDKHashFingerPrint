@@ -38,7 +38,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,15 +81,16 @@ public class BenchmarkHashedFingerprint extends Base {
      * @throws IOException
      */
     public static void main(String[] args) throws FileNotFoundException, CDKException, IOException {
-        
-        System.out.println("Command args " +  args);
-        if (args.length==0){
+
+        System.out.println("Command args " + Arrays.toString(args));
+        if (args.length == 0) {
             System.out.println("java -jar fingerprinter-1.0-SNAPSHOT.jar mol_dir cdk 1 1000");
             System.exit(0);
         }
-        
-        String s = System.getProperty("user.home") + File.separator + args[0];
-        File directory = new File(s);
+
+        File directory = new File(args[0]);
+        System.out.println("mol file dir path: " + directory.getAbsolutePath());
+
         int expectedDataSize = 100;
         if (args.length >= 4) {
             expectedDataSize = Integer.valueOf(args[3]);
@@ -118,7 +121,7 @@ public class BenchmarkHashedFingerprint extends Base {
         System.out.println("Time (mins): ");
         System.out.print("------------------------------------------------------------------------------\n");
 
-        if (args.length > 2 && args[2].equals("1")) {
+        if (args.length > 2 && args[1].equals("1")) {
             fingerprint1.setRespectRingMatches(true);
             fingerprint2.setRespectRingMatches(true);
         }
@@ -132,16 +135,16 @@ public class BenchmarkHashedFingerprint extends Base {
                 }
                 try {
                     BitSet hashedFingerPrint = null;
-                    if (args.length > 1 && args[1].equals("cdk")) {
+                    if (args.length > 2 && args[2].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 1 && args[1].equals("hash")) {
+                    } else if (args.length > 2 && args[2].equals("hash")) {
                         hashedFingerPrint = getHashedFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 1 && args[1].equals("hashbloom")) {
+                    } else if (args.length > 2 && args[2].equals("hashbloom")) {
                         hashedFingerPrint = getHashedBloomFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 1 && args[1].equals("scaffold")) {
+                    } else if (args.length > 2 && args[2].equals("scaffold")) {
                         hashedFingerPrint = getScaffoldFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
@@ -200,15 +203,15 @@ public class BenchmarkHashedFingerprint extends Base {
     }
 
     private static BigDecimal getFPR() {
-        return FP == 0 ? new BigDecimal(0.000) : new BigDecimal(FP).divide(new BigDecimal(FP + TN), 3, BigDecimal.ROUND_HALF_UP);
+        return FP == 0 ? new BigDecimal(0.000) : new BigDecimal(FP).divide(new BigDecimal(FP + TN), 3, RoundingMode.CEILING);
     }
 
     private static BigDecimal getTPR() {
-        return TP == 0 ? new BigDecimal(0.000) : new BigDecimal(TP).divide(new BigDecimal(TP + FN), 3, BigDecimal.ROUND_HALF_UP);
+        return TP == 0 ? new BigDecimal(0.000) : new BigDecimal(TP).divide(new BigDecimal(TP + FN), 3, RoundingMode.CEILING);
     }
 
     private static BigDecimal getAccuracy() {
-        return new BigDecimal(TP + TN).divide(new BigDecimal(HITS), 3, BigDecimal.ROUND_HALF_UP);
+        return new BigDecimal(TP + TN).divide(new BigDecimal(HITS), 3, RoundingMode.CEILING);
     }
 
     private static String getElapsedTime(long startTime) {
