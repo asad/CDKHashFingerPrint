@@ -3,6 +3,11 @@ The idea behind the improved version is borrowed from my blog improvised hashing
 
 http://chembioinfo.com/2011/10/30/revisiting-molecular-hashed-fingerprints/
 
+Compile with dependecies
+
+```
+mvn clean compile assembly:single
+```
 Command line interface
 
 /*  Test improved CDK FP */
