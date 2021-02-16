@@ -65,11 +65,13 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
  *
  * - 16 rings mcb/sssr
  *
+ * - 128 rings path
+ *
  * - 128 path 0-3
  *
- * - 256 path 3-5
+ * - 256 path 0-5
  *
- * - 624 path 5-7
+ * - 624 path 0-7
  *
  * <p>
  *
@@ -238,7 +240,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         encodePaths(container, 0, 3, bitSet2, size2, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 1 " + bitSet1);
         /*
-         * Encode Paths 1 to 3 length
+         * Encode Paths 1 to 5 length
          */
         int size3 = 256;
         BitSet bitSet3 = new BitSet(size3);
@@ -246,7 +248,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
 //        System.out.println("BitSet - 2 " + bitSet2);
 
         /*
-         * Encode Paths 3 and more length
+         * Encode Paths 1 to search depth length
          */
         int size4 = size - (size3 + size2 + size1 + size0);
         BitSet bitSet4 = new BitSet(size4);
