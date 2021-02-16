@@ -63,13 +63,13 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
  *
  * This sets
  *
- * - 1009-1024 rings
+ * - 16 rings mcb/sssr
  *
- * - 992-1008 atoms
+ * - 128 path 0-3
  *
- * - 769-991 length 3 or less
+ * - 256 path 3-5
  *
- * - 0-768 path length 3 or more
+ * - 624 path 5-7
  *
  * <p>
  *

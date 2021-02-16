@@ -51,13 +51,11 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.isomorphism.VentoFoggia;
 
 /**
- * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol new 2 1000
+ * Test new FP java -jar dist/CDKHashedFingerprint.jar test/data/mol scaffold
+ * 1000
  *
  * Test CDK default FP java -jar dist/CDKHashedFingerprint.jar test/data/mol cdk
- * 2 1000
- *
- * Test new FP with ring matcher java -jar dist/CDKHashedFingerprint.jar
- * test/data/mol new 1 1000
+ * 1000
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk>
  */
@@ -84,7 +82,7 @@ public class BenchmarkHashedFingerprint extends Base {
 
         System.out.println("Command args " + Arrays.toString(args));
         if (args.length == 0) {
-            System.out.println("java -jar fingerprinter-1.0-SNAPSHOT.jar mol_dir cdk 1 1000");
+            System.out.println("java -jar fingerprinter-1.0-SNAPSHOT.jar mol_dir cdk 1000");
             System.exit(0);
         }
 
@@ -92,8 +90,8 @@ public class BenchmarkHashedFingerprint extends Base {
         System.out.println("mol file dir path: " + directory.getAbsolutePath());
 
         int expectedDataSize = 100;
-        if (args.length >= 4) {
-            expectedDataSize = Integer.valueOf(args[3]);
+        if (args.length >= 3) {
+            expectedDataSize = Integer.valueOf(args[2]);
         }
         System.out.print("\n***************************************\n");
 
@@ -121,10 +119,8 @@ public class BenchmarkHashedFingerprint extends Base {
         System.out.println("Time (mins): ");
         System.out.print("------------------------------------------------------------------------------\n");
 
-        if (args.length > 2 && args[1].equals("1")) {
-            fingerprint1.setRespectRingMatches(true);
-            fingerprint2.setRespectRingMatches(true);
-        }
+        fingerprint1.setRespectRingMatches(true);
+        fingerprint2.setRespectRingMatches(true);
 
         for (int k = 0; k < molecules.size(); k += interval) {
             int counter = 1;
@@ -135,16 +131,16 @@ public class BenchmarkHashedFingerprint extends Base {
                 }
                 try {
                     BitSet hashedFingerPrint = null;
-                    if (args.length > 2 && args[2].equals("cdk")) {
+                    if (args.length >= 2 && args[1].equals("cdk")) {
                         hashedFingerPrint = getCDKFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 2 && args[2].equals("hash")) {
+                    } else if (args.length >= 2 && args[1].equals("hash")) {
                         hashedFingerPrint = getHashedFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 2 && args[2].equals("hashbloom")) {
+                    } else if (args.length >= 2 && args[1].equals("hashbloom")) {
                         hashedFingerPrint = getHashedBloomFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
-                    } else if (args.length > 2 && args[2].equals("scaffold")) {
+                    } else if (args.length >= 2 && args[1].equals("scaffold")) {
                         hashedFingerPrint = getScaffoldFingerprint(ac).asBitSet();
                         dataMap.put(inchiKey, new Data(hashedFingerPrint, ac));
                     }
@@ -177,10 +173,13 @@ public class BenchmarkHashedFingerprint extends Base {
                     if (FPMatch && trueMatch) {
                         TP++;
                     } else if (FPMatch && !trueMatch) {
-//                        System.out.println("fp " + original.getAtomContainer().getID() + "," + fragment.getAtomContainer().getID());
+//                        System.out.println("fp " + original.getAtomContainer().getID()
+//                                + "," + fragment.getAtomContainer().getID());
                         FP++;
                     } else if (!FPMatch && trueMatch) {
                         FN++;
+//                        System.out.println("fn " + original.getAtomContainer().getID()
+//                                + "," + fragment.getAtomContainer().getID());
                     } else if (!FPMatch && !trueMatch) {
                         TN++;
                     }
