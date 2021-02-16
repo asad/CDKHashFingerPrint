@@ -177,6 +177,7 @@ public class BenchmarkHashedFingerprint extends Base {
                     if (FPMatch && trueMatch) {
                         TP++;
                     } else if (FPMatch && !trueMatch) {
+//                        System.out.println("fp " + original.getAtomContainer().getID() + "," + fragment.getAtomContainer().getID());
                         FP++;
                     } else if (!FPMatch && trueMatch) {
                         FN++;

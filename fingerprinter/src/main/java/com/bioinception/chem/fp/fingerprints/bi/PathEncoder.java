@@ -67,8 +67,11 @@ public class PathEncoder {
         if (state.getNumPaths() > pathLimit) {
             throw new CDKException("Too many paths! Structure is likely a cage, reduce path length or increase path limit");
         }
-        if (state.getAtomPath().size() < state.getMinDepth()
+//        System.out.println("state.getMinDepth() "+state.getMinDepth());
+//        System.out.println("state.getMaxDepth() "+state.getMaxDepth());
+        if (state.getAtomPath().size() >= state.getMinDepth()
                 && state.getAtomPath().size() < state.getMaxDepth()) {
+//            System.out.println("state.getAtomPath().size() "+state.getAtomPath().size());
             for (IBond bond : state.getBonds(beg)) {
                 if (bond.equals(prev)) {
                     continue;

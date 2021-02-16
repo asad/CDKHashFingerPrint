@@ -5,6 +5,7 @@
 package com.bioinception.chem.fp.fingerprints;
 
 import com.bioinception.chem.fp.fingerprints.hashed.HashedBloomFingerprinter;
+import com.bioinception.chem.fp.fingerprints.helper.FingerprinterTool;
 import com.bioinception.chem.fp.fingerprints.interfaces.IFingerprinter;
 import java.io.FileNotFoundException;
 import java.util.BitSet;
@@ -13,7 +14,6 @@ import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;

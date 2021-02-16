@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -168,15 +169,15 @@ public class BenchmarkIsomorphism extends Base {
     }
 
     private static BigDecimal getFPR() {
-        return FP == 0 ? new BigDecimal(0.000) : new BigDecimal(FP).divide(new BigDecimal(FP + TN), 3, BigDecimal.ROUND_HALF_UP);
+        return FP == 0 ? new BigDecimal(0.000) : new BigDecimal(FP).divide(new BigDecimal(FP + TN), 3, RoundingMode.CEILING);
     }
 
     private static BigDecimal getTPR() {
-        return TP == 0 ? new BigDecimal(0.000) : new BigDecimal(TP).divide(new BigDecimal(TP + FN), 3, BigDecimal.ROUND_HALF_UP);
+        return TP == 0 ? new BigDecimal(0.000) : new BigDecimal(TP).divide(new BigDecimal(TP + FN), 3, RoundingMode.CEILING);
     }
 
     private static BigDecimal getAccuracy() {
-        return new BigDecimal(TP + TN).divide(new BigDecimal(HITS), 3, BigDecimal.ROUND_HALF_UP);
+        return new BigDecimal(TP + TN).divide(new BigDecimal(HITS), 3, RoundingMode.CEILING);
     }
 
     private static String getElapsedTime(long startTime) {

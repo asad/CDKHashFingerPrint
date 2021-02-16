@@ -4,10 +4,10 @@
  */
 package com.bioinception.chem.fp.fingerprints.hashed;
 
+import com.bioinception.chem.fp.fingerprints.helper.FingerprinterTool;
 import com.bioinception.chem.fp.fingerprints.interfaces.IFingerprinter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.BitSet;
@@ -18,7 +18,6 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -32,6 +31,7 @@ public class HashedFingerprinterTest {
 
     /**
      * Test of HashedFingerprinter method
+     *
      * @bug
      * @throws InvalidSmilesException
      * @throws CDKException
@@ -51,6 +51,7 @@ public class HashedFingerprinterTest {
 
     /**
      * Test of HashedFingerprinter method
+     *
      * @bug
      * @throws InvalidSmilesException
      * @throws CDKException
@@ -89,11 +90,10 @@ public class HashedFingerprinterTest {
     @Test
     public void testGenerateFingerprintIsNotASubset1() throws InvalidSmilesException, CDKException, FileNotFoundException, FileNotFoundException {
 
-        String smilesT
-                = "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
+        String smilesT = "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
         String smilesQ = "OC[C@@H](O)[C@@H](O)[C@H](O)[C@@H](O)C(O)=O";
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-        smilesParser.setPreservingAromaticity(true);
+        smilesParser.kekulise(true);
         IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
 
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);

@@ -217,24 +217,24 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         /*
          * Encode Atoms
          */
-        int size1 = 16;
+        int size1 = 128;
         BitSet bitSet1 = new BitSet(size1);
-        encodePaths(container, 0, 2, bitSet1, size1, pathLimit, hashPseudoAtoms);
+        encodePaths(container, 0, 3, bitSet1, size1, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 1 " + bitSet1);
         /*
          * Encode Paths 1 to 3 length
          */
-        int size2 = size - 768 - size1 - size0;
+        int size2 = 256;
         BitSet bitSet2 = new BitSet(size2);
-        encodePaths(container, 0, 3, bitSet2, size2, pathLimit, hashPseudoAtoms);
+        encodePaths(container, 0, 5, bitSet2, size2, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 2 " + bitSet2);
 
         /*
          * Encode Paths 3 and more length
          */
-        int size3 = size - size2;
+        int size3 = size - (size2 + size1 + size0);
         BitSet bitSet3 = new BitSet(size3);
-        encodePaths(container, 3, searchDepth, bitSet3, size3, pathLimit, hashPseudoAtoms);
+        encodePaths(container, 0, searchDepth, bitSet3, size3, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 3 " + bitSet3);
 
         /*
@@ -242,16 +242,18 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
          */
         BitSet bitSet = new BitSet(size);
 
-        BitSet concatenate_vectors = concatenate_vectors(bitSet0, bitSet1);
-        concatenate_vectors = concatenate_vectors(concatenate_vectors, bitSet2);
-        concatenate_vectors = concatenate_vectors(concatenate_vectors, bitSet3);
+        BitSet concatenate_vectors = concatenate_vectors(bitSet1, bitSet0);
+        concatenate_vectors = concatenate_vectors(bitSet2, concatenate_vectors);
+        concatenate_vectors = concatenate_vectors(bitSet3, concatenate_vectors);
 //        System.out.println("Concat BitSet " + concatenate_vectors);
 
         bitSet.or(concatenate_vectors);
+//        System.out.println("BitSet: " + bitSet);
         return new BitSetFingerprint(bitSet);
     }
 
     private void setRingBits(BitSet bitset, IRingSet rings, int maxRingSize) {
+//        System.out.println("Rings " + rings.getAtomContainerCount());
         int ringSize = 0;
         for (IAtomContainer ring : rings.atomContainers()) {
             int atomCount = ring.getAtomCount();

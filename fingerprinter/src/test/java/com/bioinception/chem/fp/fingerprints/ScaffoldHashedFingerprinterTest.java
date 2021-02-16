@@ -5,6 +5,8 @@
 package com.bioinception.chem.fp.fingerprints;
 
 import com.bioinception.chem.fp.fingerprints.bi.ScaffoldHashedFingerprinter;
+import com.bioinception.chem.fp.fingerprints.helper.FingerprinterTool;
+import static com.bioinception.chem.fp.fingerprints.helper.FingerprinterTool.isSubset;
 import java.io.FileNotFoundException;
 import java.util.BitSet;
 import org.freehep.graphicsbase.util.Assert;
@@ -12,7 +14,6 @@ import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -82,8 +83,7 @@ public class ScaffoldHashedFingerprinterTest {
     @Test
     public void testGenerateFingerprintIsNotASubset1() throws InvalidSmilesException, CDKException, FileNotFoundException, FileNotFoundException {
 
-        String smilesT
-                = "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
+        String smilesT = "O[C@H]1[C@H](O)[C@@H](O)[C@H](O)[C@H](O)[C@@H]1O";
         String smilesQ = "OC[C@@H](O)[C@@H](O)[C@H](O)[C@@H](O)C(O)=O";
         IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
@@ -97,9 +97,9 @@ public class ScaffoldHashedFingerprinterTest {
 
         System.out.println("fpQ " + fingerprintQ.toString());
         System.out.println("fpT " + fingerprintT.toString());
-        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+        System.out.println("isSubset: " + isSubset(fingerprintT, fingerprintQ));
 
-        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+        Assert.assertFalse(isSubset(fingerprintT, fingerprintQ));
     }
 
     @Test
@@ -173,6 +173,64 @@ public class ScaffoldHashedFingerprinterTest {
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
         IAtomContainer removeHydrogens = AtomContainerManipulator.removeHydrogens(moleculeQ);
 
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
+        IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
+
+        fingerprintQ = fingerprint.getBitFingerprint(removeHydrogens).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(removeHydrogens1).asBitSet();
+
+        System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
+        System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());
+        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+
+        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+    }
+
+    @Test
+    public void testGenerateFingerprintIsNotASubset5() throws InvalidSmilesException, Exception {
+
+        String smilesq = "OC[C@H]1OC(=O)C[C@@H]1O";
+        IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesq);
+        String smilest = "CCCC(=O)OCC(COC(=O)CCC)OC(=O)CCC";
+        IAtomContainer moleculeT = smilesParser.parseSmiles(smilest);
+        moleculeQ.setID("CHEBI:17281");
+        moleculeT.setID("CHEBI:35020");
+        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+        IFingerprinter fingerprint = new ScaffoldHashedFingerprinter(1024);
+        BitSet fingerprintQ;
+        BitSet fingerprintT;
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
+        IAtomContainer removeHydrogens = AtomContainerManipulator.removeHydrogens(moleculeQ);
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
+        IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
+
+        fingerprintQ = fingerprint.getBitFingerprint(removeHydrogens).asBitSet();
+        fingerprintT = fingerprint.getBitFingerprint(removeHydrogens1).asBitSet();
+
+        System.out.println(moleculeQ.getID() + " fpQ " + fingerprintQ.toString());
+        System.out.println(moleculeT.getID() + " fpT " + fingerprintT.toString());
+        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+
+        Assert.assertFalse(FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+    }
+    
+    @Test
+    public void testGenerateFingerprintIsNotASubset6() throws InvalidSmilesException, Exception {
+
+        String smilesq = "CC1=C2CC[C@]3(C)CC[C@H](O)C(=C)[C@H]3C[C@H](CC1)C2(C)C";
+        IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesq);
+        String smilest = "CC(C)=CCC[C@]1(C)[C@H]2CC=C(C)[C@@H]1C2";
+        IAtomContainer moleculeT = smilesParser.parseSmiles(smilest);
+        moleculeQ.setID("CHEBI:30038");
+        moleculeT.setID("CHEBI:62756");
+        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+        IFingerprinter fingerprint = new ScaffoldHashedFingerprinter(1024);
+        BitSet fingerprintQ;
+        BitSet fingerprintT;
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
+        IAtomContainer removeHydrogens = AtomContainerManipulator.removeHydrogens(moleculeQ);
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
         IAtomContainer removeHydrogens1 = AtomContainerManipulator.removeHydrogens(moleculeT);
 
