@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.jniinchi.INCHI_RET;
@@ -40,6 +41,9 @@ import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.Intractable;
+import org.openscience.cdk.graph.CycleFinder;
+import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.interfaces.IAtom;
@@ -50,6 +54,7 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 
 /**
  *
@@ -86,31 +91,30 @@ public class Base {
      */
     public static Map<String, IAtomContainer> readMDLMolecules(File dir, int cutoff) throws FileNotFoundException, CDKException, IOException {
         System.out.println("\nReading Files: ");
-        Map<String, IAtomContainer> inchiMolMap = new HashMap<String, IAtomContainer>();
+        Map<String, IAtomContainer> inchiMolMap = new HashMap<>();
         if (dir.isDirectory()) {
             File[] listFiles = dir.listFiles();
             for (File fileIndex : listFiles) {
                 if (fileIndex.isFile() && fileIndex.getName().contains(".mol")) {
-                    MDLV2000Reader reader = new MDLV2000Reader(new FileReader(fileIndex));
-                    IAtomContainer ac = (IAtomContainer) reader.read(new AtomContainer());
-                    try {
-                        initializeMolecule(ac);
-                        ac.setID((fileIndex.getName().split(".mol"))[0]);
-                        String inchiKey = generateInchiKey(ac);
-                        if (inchiKey == null || ac.getAtomCount() < 3) {
-                            continue;
+                    try (MDLV2000Reader reader = new MDLV2000Reader(new FileReader(fileIndex))) {
+                        IAtomContainer ac = (IAtomContainer) reader.read(new AtomContainer());
+                        try {
+                            initializeMolecule(ac);
+                            ac.setID((fileIndex.getName().split(".mol"))[0]);
+                            String inchiKey = generateInchiKey(ac);
+                            if (inchiKey == null || ac.getAtomCount() < 3) {
+                                continue;
+                            }
+                            inchiMolMap.put(inchiKey, ac);
+                        } catch (Exception ex) {
+                            Logger.getLogger(Base.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        inchiMolMap.put(inchiKey, ac);
-                    } catch (Exception ex) {
-                        Logger.getLogger(Base.class.getName()).log(Level.SEVERE, null, ex);
+                        if ((cutoff - inchiMolMap.size()) == 0) {
+                            break;
+                        } else {
+                            System.out.print("\r# " + (cutoff - inchiMolMap.size()));
+                        }
                     }
-
-                    if ((cutoff - inchiMolMap.size()) == 0) {
-                        break;
-                    } else {
-                        System.out.print("\r# " + (cutoff - inchiMolMap.size()));
-                    }
-                    reader.close();
                 }
             }
         }
@@ -130,7 +134,7 @@ public class Base {
      */
     private static Integer initializeMolecule(IAtomContainer atomContainer) throws CDKException {
         Integer hashRings = 0;
-        Map<String, Integer> valencesTable = new HashMap<String, Integer>();
+        Map<String, Integer> valencesTable = new HashMap<>();
         valencesTable.put("H", 1);
         valencesTable.put("Li", 1);
         valencesTable.put("Be", 2);
@@ -188,8 +192,20 @@ public class Base {
         }
 
         // sets SSSR information
-        SSSRFinder finder = new SSSRFinder(atomContainer);
-        IRingSet sssr = finder.findEssentialRings();
+//        SSSRFinder finder = new SSSRFinder(atomContainer);
+//        IRingSet sssr = finder.findEssentialRings();
+        // all cycles or relevant or essential
+        CycleFinder cf = Cycles.mcb();
+
+        IRingSet sssr = null;
+        try {
+            Cycles cycles = cf.find(atomContainer);
+            sssr = cycles.toRingSet();
+            RingSetManipulator.markAromaticRings(sssr);
+            RingSetManipulator.sort(sssr);
+        } catch (Intractable e) {
+            // ignore error - edge short cycles do not check tractability
+        }
 
         for (IAtom atom : atomContainer.atoms()) {
 
@@ -200,7 +216,7 @@ public class Base {
                 atom.setFlag(CDKConstants.ISINRING, true);
                 atom.setFlag(CDKConstants.ISALIPHATIC, false);
                 // lets find which ring sets it is a part of
-                List<Integer> ringsizes = new ArrayList<Integer>();
+                List<Integer> ringsizes = new ArrayList<>();
                 IRingSet currentRings = allRings.getRings(atom);
                 int min = 0;
                 for (int i = 0; i < currentRings.getAtomContainerCount(); i++) {
@@ -219,7 +235,7 @@ public class Base {
 
             // determine how many rings bonds each atom is a part of
             int hCount;
-            if (atom.getImplicitHydrogenCount() == CDKConstants.UNSET) {
+            if (Objects.equals(atom.getImplicitHydrogenCount(), CDKConstants.UNSET)) {
                 hCount = 0;
             } else {
                 hCount = atom.getImplicitHydrogenCount();
@@ -227,16 +243,12 @@ public class Base {
 
             List<IAtom> connectedAtoms = atomContainer.getConnectedAtomsList(atom);
             int total = hCount + connectedAtoms.size();
-            for (IAtom connectedAtom : connectedAtoms) {
-                if (connectedAtom.getSymbol().equals("H")) {
-                    hCount++;
-                }
-            }
+            hCount = connectedAtoms.stream().filter(connectedAtom -> (connectedAtom.getSymbol().equals("H"))).map(_item -> 1).reduce(hCount, Integer::sum);
             atom.setProperty(CDKConstants.TOTAL_CONNECTIONS, total);
             atom.setProperty(CDKConstants.TOTAL_H_COUNT, hCount);
 
             if (valencesTable.get(atom.getSymbol()) != null) {
-                int formalCharge = atom.getFormalCharge() == CDKConstants.UNSET ? 0 : atom.getFormalCharge();
+                int formalCharge = Objects.equals(atom.getFormalCharge(), CDKConstants.UNSET) ? 0 : atom.getFormalCharge();
                 atom.setValency(valencesTable.get(atom.getSymbol()) - formalCharge);
             }
         }
