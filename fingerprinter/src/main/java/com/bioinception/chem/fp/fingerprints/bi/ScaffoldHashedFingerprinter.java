@@ -1,6 +1,6 @@
 /* 
  * Copyright (C) 2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
- *               2021  Syed Asad Rahman <asad.rahman@bioinceptionlabs.com>
+ *               2020-2021  Syed Asad Rahman <asad.rahman@bioinceptionlabs.com>
 
  * Contact: cdk-devel@lists.sourceforge.net
  *

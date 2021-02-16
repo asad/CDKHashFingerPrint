@@ -1,7 +1,7 @@
 /* $Revision$ $Author$ $Date$
  *
  * Copyright (C) 2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
- *               2021  Syed Asad Rahman <asad@ebi.ac.uk>
+ *               2020-2021  Syed Asad Rahman <asad@ebi.ac.uk>
  *           
  *
  * Contact: cdk-devel@lists.sourceforge.net
