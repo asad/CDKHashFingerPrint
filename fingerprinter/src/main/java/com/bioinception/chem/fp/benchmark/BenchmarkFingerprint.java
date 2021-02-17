@@ -73,7 +73,7 @@ public class BenchmarkFingerprint extends Base {
      * @throws IOException
      */
     public static void main(String[] args) throws FileNotFoundException, CDKException, IOException {
-        int expectedDataSize = 200;
+        int expectedDataSize = 1000;
         File directory = new File("/Users/asad/github/rhea/mol");
         System.out.println("mol file dir path: " + directory.getAbsolutePath());
 

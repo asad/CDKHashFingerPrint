@@ -210,7 +210,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         /*
          * Encode Rings
          */
-        int size0 = 16;
+        int size0 = 32;
         BitSet bitSet0 = new BitSet(size0);
         if (rings != null) {
             setRingBits(bitSet0, rings, size0);
@@ -235,6 +235,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
          */
         int size4 = size - (size1 + size0);
 //        int size4 = size - (size1);
+//        int size4 = size - (size0);
         BitSet bitSet4 = new BitSet(size4);
         encodePaths(container, 0, searchDepth, bitSet4, size4, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 4 " + bitSet4);
@@ -242,6 +243,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         /*
          * Set all bits
          */
+//        BitSet concatenate_vectors = concatenate_vectors(bitSet4, bitSet0);
 //        BitSet concatenate_vectors = concatenate_vectors(bitSet4, bitSet1);
         BitSet concatenate_vectors = concatenate_vectors(bitSet1, bitSet0);
         concatenate_vectors = concatenate_vectors(bitSet4, concatenate_vectors);
