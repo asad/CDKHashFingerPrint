@@ -191,11 +191,11 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         logger.debug("time for aromaticity calculation: " + (after - before) + " milliseconds");
         logger.debug("Finished Aromaticity Detection");
 
-        // all cycles or relevant or essential
+//        /* all cycles or relevant or essential*/
 //        CycleFinder cf = Cycles.or(Cycles.all(),
 //                Cycles.or(Cycles.relevant(),
 //                        Cycles.essential()));
-        //minimal cycle basis
+        /*minimal cycle basis*/
         CycleFinder cf = Cycles.mcb();
 
         IRingSet rings = null;

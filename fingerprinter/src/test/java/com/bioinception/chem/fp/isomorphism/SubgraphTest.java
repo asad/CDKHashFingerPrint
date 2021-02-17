@@ -113,7 +113,7 @@ public class SubgraphTest {
         moleculeT = AtomContainerManipulator.removeHydrogens(moleculeT);
 
         BondMatcher bondmatcher = BondMatcher.forOrder();
-        AtomMatcher atommatcher = AtomMatcher.forAny();
+        AtomMatcher atommatcher = AtomMatcher.forElement();
 
         int count_bond_match = FluentIterable.from(
                 VentoFoggia.findSubstructure(moleculeT,
@@ -130,5 +130,48 @@ public class SubgraphTest {
 
         Assert.assertEquals(true, trueMatch);
         Assert.assertEquals(true, match);
+    }
+
+    /**
+     * Test of HashedFingerprinter method
+     *
+     * @throws InvalidSmilesException
+     * @throws CDKException
+     */
+    @Test
+    public void testGenerateFingerprintIsSubset6() throws InvalidSmilesException, CDKException {
+
+        String smilesq = "CC1=C2CC[C@]3(C)CC[C@H](O)C(=C)[C@H]3C[C@H](CC1)C2(C)C";
+        IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesq);
+        String smilest = "CC(C)=CCC[C@]1(C)[C@H]2CC=C(C)[C@@H]1C2";
+        IAtomContainer moleculeT = smilesParser.parseSmiles(smilest);
+        moleculeQ.setID("CHEBI:30038");
+        moleculeT.setID("CHEBI:62756");
+        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeQ);
+        moleculeQ = AtomContainerManipulator.removeHydrogens(moleculeQ);
+
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(moleculeT);
+        moleculeT = AtomContainerManipulator.removeHydrogens(moleculeT);
+
+        BondMatcher bondmatcher = BondMatcher.forOrder();
+        AtomMatcher atommatcher = AtomMatcher.forElement();
+
+        int count_bond_match = FluentIterable.from(
+                VentoFoggia.findSubstructure(moleculeT,
+                        atommatcher, bondmatcher)
+                        .matchAll(moleculeQ)).size();
+        int count_match = FluentIterable.from(
+                VentoFoggia.findSubstructure(moleculeT)
+                        .matchAll(moleculeQ)).size();
+        boolean trueMatch = count_bond_match > 0;
+        boolean match = count_match > 0;
+
+        System.out.println("isSubset match bonds too: " + trueMatch);
+        System.out.println("isSubset: " + match);
+
+        Assert.assertEquals(false, trueMatch);
+        Assert.assertEquals(false, match);
     }
 }
