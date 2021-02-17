@@ -184,6 +184,14 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
 
+        if (!hasPseudoAtom(container.atoms())) {
+            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
+            Aromaticity.cdkLegacy().apply(container);
+        }
+        long after = System.currentTimeMillis();
+        logger.debug("time for aromaticity calculation: " + (after - before) + " milliseconds");
+        logger.debug("Finished Aromaticity Detection");
+
         // all cycles or relevant or essential
 //        CycleFinder cf = Cycles.or(Cycles.all(),
 //                Cycles.or(Cycles.relevant(),
@@ -200,15 +208,6 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         } catch (Intractable e) {
             // ignore error - edge short cycles do not check tractability
         }
-
-        if (!hasPseudoAtom(container.atoms())) {
-            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(container);
-            Aromaticity.cdkLegacy().apply(container);
-        }
-        long after = System.currentTimeMillis();
-        logger.debug("time for aromaticity calculation: " + (after - before) + " milliseconds");
-        logger.debug("Finished Aromaticity Detection");
-
         /*
          * Encode Rings
          */
@@ -259,14 +258,13 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         /*
          * Set all bits
          */
-        BitSet bitSet = new BitSet(size);
-
         BitSet concatenate_vectors = concatenate_vectors(bitSet1, bitSet0);
         concatenate_vectors = concatenate_vectors(bitSet2, concatenate_vectors);
         concatenate_vectors = concatenate_vectors(bitSet3, concatenate_vectors);
         concatenate_vectors = concatenate_vectors(bitSet4, concatenate_vectors);
 //        System.out.println("Concat BitSet " + concatenate_vectors);
 
+        BitSet bitSet = new BitSet(size);
         bitSet.or(concatenate_vectors);
 //        System.out.println("BitSet: " + bitSet);
         return new BitSetFingerprint(bitSet);

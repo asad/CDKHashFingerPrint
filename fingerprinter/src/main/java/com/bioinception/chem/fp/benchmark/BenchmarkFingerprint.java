@@ -73,7 +73,7 @@ public class BenchmarkFingerprint extends Base {
      * @throws IOException
      */
     public static void main(String[] args) throws FileNotFoundException, CDKException, IOException {
-        int expectedDataSize = 100;
+        int expectedDataSize = 200;
         File directory = new File("/Users/asad/github/rhea/mol");
         System.out.println("mol file dir path: " + directory.getAbsolutePath());
 
@@ -89,7 +89,7 @@ public class BenchmarkFingerprint extends Base {
         for (int k = 0; k < molecules.size();) {
             int counter = 1;
             k += interval;
-            System.out.println("K: " + k + ", counter: " + counter + ", interval: " + interval);
+//            System.out.println("K: " + k + ", counter: " + counter + ", interval: " + interval);
 
             for (String inchiKey : molecules.keySet()) {
                 IAtomContainer ac = molecules.get(inchiKey);
@@ -121,10 +121,9 @@ public class BenchmarkFingerprint extends Base {
 
             long startTime = System.currentTimeMillis();
 
-            Set<String> cdk_scaffold_fp = new TreeSet<>();
-            Set<String> cdk_scaffold_graph = new TreeSet<>();
-            Set<String> scaffold_cdk_fp = new TreeSet<>();
-            Set<String> scaffold_cdk_graph = new TreeSet<>();
+            Set<String> scaffold_fp = new TreeSet<>();
+            Set<String> cdk_fp = new TreeSet<>();
+            Set<String> graph = new TreeSet<>();
             /*
              * Matcher
              */
@@ -140,64 +139,83 @@ public class BenchmarkFingerprint extends Base {
 
 //                    System.out.println("key1 " + original.get(0).getAtomContainer().getID()
 //                            + ", key2:" + fragment.get(1).getAtomContainer().getID());
+//                    System.out.println("name fp orignal 0 " + original.get(0).getFPName()
+//                            + " name fp orignal 1 " + original.get(1).getFPName());
+//                    System.out.println("name fp frag 0 " + fragment.get(0).getFPName()
+//                            + " name fp orignal 1 " + fragment.get(1).getFPName());
                     if (original.get(0).getFPName().equals("CDK")
-                            && fragment.get(1).getFPName().equals("SCAFFOLD")) {
+                            && fragment.get(0).getFPName().equals("CDK")) {
                         boolean graph_match = FluentIterable.from(
                                 VentoFoggia.findSubstructure(original.get(0).getAtomContainer(),
                                         atommatcher, bondmatcher)
-                                        .matchAll(fragment.get(1).getAtomContainer())).size() > 0;
-                        boolean fpMatch = FingerprinterTool.isSubset(original.get(0).getFingerprint(),
-                                fragment.get(1).getFingerprint());
+                                        .matchAll(fragment.get(0).getAtomContainer())).size() > 0;
+                        boolean fpMatch = FingerprinterTool.isSubset(
+                                original.get(0).getFingerprint(),
+                                fragment.get(0).getFingerprint());
 
 //                        System.out.println(
 //                                "key1 " + key1 + ", key2:" + key2
 //                                + ", graph_match " + graph_match
 //                                + ", fpMatch " + fpMatch);
                         if (graph_match) {
-                            cdk_scaffold_graph.add(original.get(0).getAtomContainer().getID() + "_"
-                                    + fragment.get(1).getAtomContainer().getID());
+                            graph.add(original.get(0).getAtomContainer().getID() + "_"
+                                    + fragment.get(0).getAtomContainer().getID());
                         }
 
                         if (fpMatch) {
-                            cdk_scaffold_fp.add(original.get(0).getAtomContainer().getID() + "_"
-                                    + fragment.get(1).getAtomContainer().getID());
+                            cdk_fp.add(original.get(0).getAtomContainer().getID() + "_"
+                                    + fragment.get(0).getAtomContainer().getID());
                         }
-                    } else if (original.get(1).getFPName().equals("SCAFFOLD")
-                            && fragment.get(0).getFPName().equals("CDK")) {
+                    }
+
+                    if (original.get(1).getFPName().equals("SCAFFOLD")
+                            && fragment.get(1).getFPName().equals("SCAFFOLD")) {
                         boolean graph_match = FluentIterable.from(
-                                VentoFoggia.findSubstructure(original.get(0).getAtomContainer())
+                                VentoFoggia.findSubstructure(original.get(1).getAtomContainer())
                                         .matchAll(fragment.get(1).getAtomContainer())).size() > 0;
-                        boolean fpMatch = FingerprinterTool.isSubset(original.get(0).getFingerprint(),
+                        boolean fpMatch = FingerprinterTool.isSubset(original.get(1).getFingerprint(),
                                 fragment.get(1).getFingerprint());
 
 //                        System.out.println("key1 " + key1 + ", key2:" + key2
 //                                + ", graph_match " + graph_match
 //                                + ", fpMatch " + fpMatch);
                         if (graph_match) {
-                            scaffold_cdk_graph.add(original.get(0).getAtomContainer().getID() + "_"
+                            graph.add(original.get(1).getAtomContainer().getID() + "_"
                                     + fragment.get(1).getAtomContainer().getID());
                         }
 
                         if (fpMatch) {
-                            scaffold_cdk_fp.add(original.get(0).getAtomContainer().getID() + "_"
+                            scaffold_fp.add(original.get(1).getAtomContainer().getID() + "_"
                                     + fragment.get(1).getAtomContainer().getID());
                         }
                     }
-
                 }
             }
+            System.out.print("\n***************************************\n");
+//            System.out.println("A: CDK : " + cdk_fp);
+//            System.out.println("B: Scaffold : " + scaffold_fp);
+//            System.out.println("C: Graph: " + graph);
 
-            Set<String> intersection_cdk_graph = new HashSet<>(cdk_scaffold_fp);
-            intersection_cdk_graph.retainAll(cdk_scaffold_graph);
-            System.out.println("A: CDK and Graph " + intersection_cdk_graph.size());
+            System.out.println("A: CDK: " + cdk_fp.size());
+            System.out.println("B: Scaffold: " + scaffold_fp.size());
+            System.out.println("C: Graph: " + graph.size());
 
-            Set<String> intersection_scaffold_graph = new HashSet<>(scaffold_cdk_fp);
-            intersection_scaffold_graph.retainAll(scaffold_cdk_graph);
-            System.out.println("B: Scaffold and Graph " + intersection_scaffold_graph.size());
+            Set<String> intersection_cdk_scaffold_fp = new HashSet<>(cdk_fp);
+            intersection_cdk_scaffold_fp.retainAll(scaffold_fp);
+            System.out.println("A&B: CDK - Scaffold FP: " + intersection_cdk_scaffold_fp.size());
 
-            Set<String> intersection = new HashSet<>(intersection_cdk_graph);
-            intersection.retainAll(intersection_scaffold_graph);
-            System.out.println("C: Scaffold & CDK and Graph " + intersection.size());
+            Set<String> intersection_cdk_graph = new HashSet<>(cdk_fp);
+            intersection_cdk_graph.retainAll(graph);
+            System.out.println("A&C: CDK - Graph FP: " + intersection_cdk_graph.size());
+
+            Set<String> intersection_scaffold_graph = new HashSet<>(scaffold_fp);
+            intersection_scaffold_graph.retainAll(graph);
+            System.out.println("B&C: Scaffold - Graph FP: " + intersection_scaffold_graph.size());
+
+            Set<String> intersection_cdk_scaffold_graph = new HashSet<>(cdk_fp);
+            intersection_cdk_scaffold_graph.retainAll(scaffold_fp);
+            intersection_cdk_scaffold_graph.retainAll(graph);
+            System.out.println("A&B&C: CDK - Scaffold - Graph: " + intersection_cdk_scaffold_graph.size());
 
             System.out.print(dataMap.size() + "*" + dataMap.size() + "\t\t");
             System.out.println(getElapsedTime(startTime));
