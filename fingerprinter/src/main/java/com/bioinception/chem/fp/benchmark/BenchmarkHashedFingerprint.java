@@ -30,9 +30,6 @@ import static com.bioinception.chem.fp.benchmark.helper.Base.readMDLMolecules;
 import com.bioinception.chem.fp.benchmark.helper.Data;
 import com.bioinception.chem.fp.fingerprints.bi.ScaffoldHashedFingerprinter;
 import com.bioinception.chem.fp.fingerprints.cdk.Fingerprinter;
-import com.bioinception.chem.fp.fingerprints.hashed.HashedBloomFingerprinter;
-import com.bioinception.chem.fp.fingerprints.hashed.HashedFingerprinter;
-import com.bioinception.chem.fp.fingerprints.interfaces.IFingerprinter;
 import com.google.common.collect.FluentIterable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,10 +41,13 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.isomorphism.AtomMatcher;
+import org.openscience.cdk.isomorphism.BondMatcher;
 import org.openscience.cdk.isomorphism.VentoFoggia;
 
 /**
@@ -69,8 +69,6 @@ public class BenchmarkHashedFingerprint extends Base {
     private static final Map<String, Data> dataMap = new HashMap<String, Data>();
     private static final org.openscience.cdk.fingerprint.IFingerprinter cdkFingerprint = new Fingerprinter(1024);
     private static final org.openscience.cdk.fingerprint.IFingerprinter scaffoldFingerprint = new ScaffoldHashedFingerprinter(1024);
-    private static final IFingerprinter fingerprint1 = new HashedFingerprinter(1024);
-    private static final IFingerprinter fingerprint2 = new HashedBloomFingerprinter(1024);
 
     /**
      * @param args the command line arguments
@@ -119,9 +117,6 @@ public class BenchmarkHashedFingerprint extends Base {
         System.out.println("Time (mins): ");
         System.out.print("------------------------------------------------------------------------------\n");
 
-        fingerprint1.setRespectRingMatches(true);
-        fingerprint2.setRespectRingMatches(true);
-
         for (int k = 0; k < molecules.size();) {
             int counter = 1;
             k += interval;
@@ -159,14 +154,20 @@ public class BenchmarkHashedFingerprint extends Base {
             TN = 0;
             HITS = 0;
 
+            /*
+             * Matcher
+             */
+            BondMatcher bondmatcher = BondMatcher.forOrder();
+            AtomMatcher atommatcher = AtomMatcher.forElement();
             long startTime = System.currentTimeMillis();
             dataMap.values().forEach((Data fragment) -> {
-                dataMap.values().stream().map(original -> {
+                dataMap.values().stream().map((Data original) -> {
                     boolean FPMatch = FingerprinterTool.isSubset(
                             original.getFingerprint(),
                             fragment.getFingerprint());
-                    int count_bond_match = FluentIterable.from(
-                            VentoFoggia.findSubstructure(original.getAtomContainer())
+                    int count_bond_match;
+                    count_bond_match = FluentIterable.from(
+                            VentoFoggia.findSubstructure(original.getAtomContainer(), atommatcher, bondmatcher)
                                     .matchAll(fragment.getAtomContainer())).size();
                     boolean trueMatch = count_bond_match > 0;
                     if (FPMatch && trueMatch) {
