@@ -66,11 +66,7 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
  *
  * - 128 rings path
  *
- * - 128 path 0-3
- *
- * - 256 path 0-5
- *
- * - 624 path 0-7
+ * - 368 path 0-7
  *
  * <p>
  *
@@ -79,7 +75,7 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
  * Molecule molecule = new Molecule();
  * IFingerprinter fingerprinter = new ScaffoldHashedFingerprinter();
  * IBitFingerprint fingerprint = fingerprinter.getBitFingerprint(molecule);
- * fingerprint.size(); // returns 1024 by default
+ * fingerprint.size(); // returns 512 by default
  * fingerprint.length(); // returns the highest set bit
  * </pre>
  * <p>
@@ -210,7 +206,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         /*
          * Encode Rings
          */
-        int size0 = 32;
+        int size0 = 16;
         BitSet bitSet0 = new BitSet(size0);
         if (rings != null) {
             setRingBits(bitSet0, rings, size0);
