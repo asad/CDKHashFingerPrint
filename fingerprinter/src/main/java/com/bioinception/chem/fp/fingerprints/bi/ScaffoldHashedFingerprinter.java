@@ -117,7 +117,7 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
     /**
      * The default length of created fingerprints.
      */
-    public final static int DEFAULT_SIZE = 1024;
+    public final static int DEFAULT_SIZE = 512;
     /**
      * The default search depth used to create the fingerprints.
      */
