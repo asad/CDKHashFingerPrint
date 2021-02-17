@@ -26,7 +26,7 @@ package com.bioinception.chem.fp.fingerprints.bi;
 
 import static com.bioinception.chem.fp.fingerprints.bi.PathEncoder.encodePaths;
 import static com.bioinception.chem.fp.fingerprints.bi.PathEncoder.isPseudoAtom;
-import static com.bioinception.chem.fp.fingerprints.helper.RandomNumber.generateMersenneTwisterRandomNumber;
+import static com.bioinception.chem.fp.fingerprints.bi.PathEncoder.setRingBits;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.fingerprint.AbstractFingerprinter;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
@@ -229,28 +228,13 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
                 encodePaths(ring, 0, searchDepth, bitSet1, size1, pathLimit, hashPseudoAtoms);
             }
         }
-
-//         System.out.println("BitSet - 1 " + bitSet1);
-
-        /*
-         * Encode Atoms
-         */
-        int size2 = 128;
-        BitSet bitSet2 = new BitSet(size2);
-        encodePaths(container, 0, 3, bitSet2, size2, pathLimit, hashPseudoAtoms);
-//        System.out.println("BitSet - 2 " + bitSet2);
-        /*
-         * Encode Paths 1 to 5 length
-         */
-        int size3 = 256;
-        BitSet bitSet3 = new BitSet(size3);
-        encodePaths(container, 0, 5, bitSet3, size3, pathLimit, hashPseudoAtoms);
-//        System.out.println("BitSet - 3 " + bitSet3);
+//        System.out.println("BitSet - 1 " + bitSet1);
 
         /*
          * Encode Paths 1 to search depth length
          */
-        int size4 = size - (size3 + size2 + size1 + size0);
+        int size4 = size - (size1 + size0);
+//        int size4 = size - (size1);
         BitSet bitSet4 = new BitSet(size4);
         encodePaths(container, 0, searchDepth, bitSet4, size4, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet - 4 " + bitSet4);
@@ -258,34 +242,16 @@ public class ScaffoldHashedFingerprinter extends AbstractFingerprinter implement
         /*
          * Set all bits
          */
+//        BitSet concatenate_vectors = concatenate_vectors(bitSet4, bitSet1);
         BitSet concatenate_vectors = concatenate_vectors(bitSet1, bitSet0);
-        concatenate_vectors = concatenate_vectors(bitSet2, concatenate_vectors);
-        concatenate_vectors = concatenate_vectors(bitSet3, concatenate_vectors);
         concatenate_vectors = concatenate_vectors(bitSet4, concatenate_vectors);
 //        System.out.println("Concat BitSet " + concatenate_vectors);
 
         BitSet bitSet = new BitSet(size);
         bitSet.or(concatenate_vectors);
+//        encodePaths(container, 0, searchDepth, bitSet, 2048, pathLimit, hashPseudoAtoms);
 //        System.out.println("BitSet: " + bitSet);
         return new BitSetFingerprint(bitSet);
-    }
-
-    private void setRingBits(BitSet bitset, IRingSet rings, int maxRingSize) {
-//        System.out.println("Rings " + rings.getAtomContainerCount());
-        int ringSize = 0;
-        for (IAtomContainer ring : rings.atomContainers()) {
-            int atomCount = ring.getAtomCount();
-//            System.out.println("Ring size " + atomCount);
-            if (atomCount < maxRingSize) {
-                if (ringSize < atomCount) {
-//                    System.out.println(ringSize + ", Ring size " + atomCount);
-                    int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
-                    int ringPosition = (int) generateMersenneTwisterRandomNumber(maxRingSize, toHashCode);
-                    bitset.set(ringPosition);
-                    ringSize++;
-                }
-            }
-        }
     }
 
     /**

@@ -79,7 +79,7 @@ public class BenchmarkHashedFingerprint extends Base {
      * @throws IOException
      */
     public static void main(String[] args) throws FileNotFoundException, CDKException, IOException {
-
+        System.out.print("\n***************************************\n");
         System.out.println("Command args " + Arrays.toString(args));
         if (args.length == 0) {
             System.out.println("java -jar fingerprinter-1.0-SNAPSHOT.jar mol_dir cdk 1000");
@@ -225,14 +225,6 @@ public class BenchmarkHashedFingerprint extends Base {
 
     private static IBitFingerprint getCDKFingerprint(IAtomContainer ac) throws CDKException {
         return cdkFingerprint.getBitFingerprint(ac);
-    }
-
-    private static IBitFingerprint getHashedFingerprint(IAtomContainer ac) throws CDKException {
-        return fingerprint1.getBitFingerprint(ac);
-    }
-
-    private static IBitFingerprint getHashedBloomFingerprint(IAtomContainer ac) throws CDKException {
-        return fingerprint2.getBitFingerprint(ac);
     }
 
     private static IBitFingerprint getScaffoldFingerprint(IAtomContainer ac) throws CDKException {

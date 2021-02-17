@@ -26,12 +26,15 @@
  */
 package com.bioinception.chem.fp.fingerprints.bi;
 
+import static com.bioinception.chem.fp.fingerprints.helper.RandomNumber.generateMersenneTwisterRandomNumber;
 import java.util.BitSet;
 import java.util.List;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IRingSet;
 
 /**
  *
@@ -276,5 +279,23 @@ public class PathEncoder {
      */
     static boolean isPseudoAtom(IAtom a) {
         return getElem(a) == 0;
+    }
+
+    static void setRingBits(BitSet bitset, IRingSet rings, int maxRingSize) {
+//        System.out.println("Rings " + rings.getAtomContainerCount());
+        int ringSize = 0;
+        for (IAtomContainer ring : rings.atomContainers()) {
+            int atomCount = ring.getAtomCount();
+//            System.out.println("Ring size " + atomCount);
+            if (atomCount < maxRingSize) {
+                if (ringSize < atomCount) {
+//                    System.out.println(ringSize + ", Ring size " + atomCount);
+                    int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
+                    int ringPosition = (int) generateMersenneTwisterRandomNumber(maxRingSize, toHashCode);
+                    bitset.set(ringPosition);
+                    ringSize++;
+                }
+            }
+        }
     }
 }
